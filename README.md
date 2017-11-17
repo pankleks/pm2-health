@@ -93,7 +93,7 @@ Mail uses HTML format. To adjust template, you can edit [Template.html](./Templa
 
 ## Building
 
-`pm2-health` is written using TypeScript with `es2017` target. 
+`pm2-health` is written using TypeScript 2.6.1+ with `es2017` target. 
 
 `es2017` is supported by Node 8+. If you need to use ealier version, build solution using `es5` or `es6` target.
 
