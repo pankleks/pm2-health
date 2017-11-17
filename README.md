@@ -58,7 +58,7 @@ const probes = {
 
 > All alerts are grouped in single mail
 
-> Since build-in PMX alerting features are used only by https://keymetrics.io/, they are not utilized by `pm2-health`
+> Since build-in PMX probe alerting settings are used only by https://keymetrics.io/, they are ignored by `pm2-health`
 
 To learn how to define PMX probes for your app see: http://pm2.keymetrics.io/docs/usage/process-metrics/
 
@@ -68,7 +68,7 @@ Mail is send in HTML format, you can adjust template in `Template.html` file.
 
 Just place `<!-- body -->` inside HTML where mail body should be pasted.
 
-## Holding notifications
+## Holding notifications temporarily
 
 To hold mail notification for 30 minutes execute command:
 
