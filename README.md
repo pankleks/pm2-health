@@ -29,8 +29,7 @@ After installation, find `pm2-health` section in `module_conf.json` file in PM2 
     },
     "failed execution count": {
         "target": 0,
-        "op": ">",
-        "ifChanged": true
+        "op": ">"
     }
 },
 "probeIntervalM": 1
