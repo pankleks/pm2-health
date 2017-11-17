@@ -77,11 +77,9 @@ To configure rules of alerting, setup `probes` section in module config file.
 
 ## Holding notifications temporarily
 
-To hold mail notification for 30 minutes execute command:
+To hold mail notification for 30 minutes run: `pm2 trigger pm2-health hold`
 
-`pm2 trigger pm2-health hold`
-
-After 30 minutes, notifications will start automatically. It's usefull during planned maintanance.
+> After 30 minutes, notifications will restart automatically. It's usefull during planned maintanance.
 
 ## Mail template
 
@@ -95,6 +93,8 @@ Mail uses HTML format. To adjust template, you can edit [Template.html](./Templa
 
 ## Building
 
-`pm2-health` is written using TypeScript with ES2017 target. 
+`pm2-health` is written using TypeScript with `es2017` target. 
 
-ES2017 is supported by Node 8+, if you need to use ealier version of Node, please build solution using different target in `tsconfig.json`.
+`es2017` is supported by Node 8+. If you need to use ealier version, build solution using `es5` or `es6` target.
+
+> Solution includes VS Code settings for build and debug.
