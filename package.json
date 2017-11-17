@@ -1,7 +1,7 @@
 {
   "name": "pm2-health",
   "version": "1.0.6",
-  "description": "apps health monitor pm2 module",
+  "description": "Apps health monitor and mail notification module for pm2",
   "main": "App.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
