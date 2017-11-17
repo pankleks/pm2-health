@@ -37,7 +37,7 @@ It can:
 
 `pm2-health` can monitor any PMX probe defined in apps you run with pm2.
 
-In `Probes.js` file you can define which probes should be monitored, and what triggers an alert.
+Assuming some of your apps define PMX probes named `execution / min` and `failed execution count` you can define alerting rules in `Probes.js`:
 
 ```js
 const probes = {
@@ -54,14 +54,16 @@ const probes = {
 ```
 
 `target` - target value for probe
-`fn` - function to compare current value and target, should return `true` to trigger an alert
+
+`fn` - function to compare current value (`v`) and target (`t`). Should return `true` to trigger an alert
+
 `ifChanged` - if set to `true`, alert will fire only if probe value has changed (optional)
 
 > All alerts are grouped in single mail
 
 > Since build-in PMX probe alerting settings are used only by https://keymetrics.io/, they are ignored by `pm2-health`
 
-To learn how to define PMX probes for your app see: http://pm2.keymetrics.io/docs/usage/process-metrics/
+> Learn how to define PMX probes for your apps here: http://pm2.keymetrics.io/docs/usage/process-metrics/
 
 ## Mail template
 
