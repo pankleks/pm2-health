@@ -6,7 +6,7 @@ This [PM2](http://pm2.keymetrics.io/) module is:
 
 ## Installation
 
-`pm2 install pankleks/pm2-health`
+`pm2 install pm2-health`
 
 ## Configuration
 
