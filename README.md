@@ -56,12 +56,12 @@ After installation, find `pm2-health` section in `module_conf.json` file in PM2 
 To configure rules of alerting, setup `probes` section in module config file.
 
 ```json
-...
 "probes": {
     "metric name": {
         "target": 0,
         "op": ">",
-        "ifChanged": true
+        "ifChanged": true,
+        "disabled": false
     }    
 }
 ```
@@ -71,7 +71,9 @@ To configure rules of alerting, setup `probes` section in module config file.
 
 `op` - operator to compare metric value and target. Can be one of: `<`, `>`, `=`, `<=`, `>=`, `!=`
 
-`ifChanged` - if set to `true`, alert will trigger only if current metric value is different from last recorded value (optional)
+`ifChanged` - if `true`, alert will trigger only if current metric value is different from last recorded value (optional)
+
+`disabled` - if `true`, metric won't be tested
 
 > Learn how to define PMX probes in your apps here: http://pm2.keymetrics.io/docs/usage/process-metrics/
 

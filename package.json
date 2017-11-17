@@ -40,7 +40,8 @@
       "failed execution count": {
         "target": 0,
         "op": ">",
-        "ifChanged": true
+        "ifChanged": true,
+        "disable": true
       }
     },
     "probeIntervalM": 1

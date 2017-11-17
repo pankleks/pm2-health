@@ -32,6 +32,7 @@ interface IConfig {
             target: number;
             op: "<" | ">" | "=" | "<=" | ">=" | "!=";
             ifChanged: boolean;
+            disabled: boolean;
         }
     }
     probeIntervalM: number;
@@ -150,12 +151,12 @@ export class Health {
                 for (let key of Object.keys(monit)) {
                     let
                         probe = this._config.probes[key];
-                    if (!probe || probe.target == null)
+                    if (!probe || probe.disabled === true || isNaN(probe.target))
                         continue;
 
                     let
                         v = parseFloat(monit[key].value);
-                    if (isNaN(v) || isNaN(probe.target))
+                    if (isNaN(v))
                         continue;
                     
                     let

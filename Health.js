@@ -100,10 +100,10 @@ class Health {
                     continue;
                 for (let key of Object.keys(monit)) {
                     let probe = this._config.probes[key];
-                    if (!probe || probe.target == null)
+                    if (!probe || probe.disabled === true || isNaN(probe.target))
                         continue;
                     let v = parseFloat(monit[key].value);
-                    if (isNaN(v) || isNaN(probe.target))
+                    if (isNaN(v))
                         continue;
                     let fn = OP[probe.op];
                     if (!fn)
