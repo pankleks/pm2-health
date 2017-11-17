@@ -10,30 +10,32 @@ This [PM2](http://pm2.keymetrics.io/) module is:
 
 ## Configuration
 
-After installation, find `pm2-health` section in `module_conf.json` file in PM2 home folder (typically `~/.pm2/`) or run `pm2 conf`, if you breave enough to use vi :smile:
+After installation run `pm2 conf` to configure module. You can also edit `module_conf.json` file directly (in PM2 home folder).
 
 ```json
-"smtp": {
-    "host": "your-smtp-host",
-    "port": 587,
-    "user": "your-smtp-user",
-    "password": "your-smtp-password"
-},
-"mailTo": "mail1,mail2",
-"replyTo": "",
-"events": ["exit"],
-"probes": {
-    "execution / min": {
-        "target": 0.5,
-        "op": "<="
+"pm2-health": {
+    "smtp": {
+        "host": "your-smtp-host",
+        "port": 587,
+        "user": "your-smtp-user",
+        "password": "your-smtp-password"
     },
-    "failed execution count": {
-        "target": 0,
-        "op": ">"
-    }
-},
-"probeIntervalM": 1,
-"addLogs": true
+    "mailTo": "mail1,mail2",
+    "replyTo": "",
+    "events": ["exit"],
+    "probes": {
+        "execution / min": {
+            "target": 0.5,
+            "op": "<="
+        },
+        "failed execution count": {
+            "target": 0,
+            "op": ">"
+        }
+    },
+    "probeIntervalM": 1,
+    "addLogs": true
+}
 ```
 `smtp` - SMTP server configuration. If your SMTP doesn't require auth, leave `smtp.user` empty
 
