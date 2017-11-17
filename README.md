@@ -5,7 +5,7 @@ It can:
 * Monitor events (like app crash, restart etc) and send mail with logs as attachement
 * Monitor PMX probes defined in apps and send mail with alerts when value hits treshold
 
-# Configuration
+## Configuration
 
 ```json
 "smtp": {
@@ -31,8 +31,9 @@ It can:
 
 `probeIntervalM` - how often PMX probes should be tested [minutes] (optional) - if not set, 1 minute is used
 
-# Probes configuration
+### Probes monitor
 
+`pm2-health` can monitor any Pmx probe defined in apps you run with pm2.
 In `Probes.js` file you can define which probes should be monitored, and what triggers an alert.
 
 ```js
@@ -54,3 +55,8 @@ const probes = {
 `ifChanged` - if set to `true`, alert will fire only if probe value has changed (compared to previous one)
 
 > All alerts are grouped in single mail 
+
+### Mail template
+
+Mail is send in HTML format, you can adjust template in `Template.html` file.
+Just place `<!-- body -->` inside HTML where mail body should be pasted.
