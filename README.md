@@ -33,7 +33,7 @@ It can:
 
 > if any of required parameters are not defined, `pm2-health` will shutdown. You can check error logs for details.
 
-### Probes monitoring
+## Probes monitoring
 
 `pm2-health` can monitor any PMX probe defined in apps you run with pm2.
 In `Probes.js` file you can define which probes should be monitored, and what triggers an alert.
@@ -58,10 +58,21 @@ const probes = {
 
 > All alerts are grouped in single mail
 
+> Since build-in PMX alerting features are used only by https://keymetrics.io/, they are not utilized by `pm2-health`
+
 To learn how to define PMX probes for your app see: http://pm2.keymetrics.io/docs/usage/process-metrics/
 
-### Mail template
+## Mail template
 
 Mail is send in HTML format, you can adjust template in `Template.html` file.
 
 Just place `<!-- body -->` inside HTML where mail body should be pasted.
+
+## Holding notifications
+
+To hold mail notification for 30 minutes execute command:
+
+`pm2 trigger pm2-health hold`
+
+After 30 minutes, notifications will start automatically. It's usefull during planned maintanance.
+
