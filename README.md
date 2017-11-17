@@ -33,7 +33,7 @@ It can:
 
 > if any of required parameters are not defined, `pm2-health` will shutdown. You can check error logs for details.
 
-### Probes monitor
+### Probes monitoring
 
 `pm2-health` can monitor any Pmx probe defined in apps you run with pm2.
 In `Probes.js` file you can define which probes should be monitored, and what triggers an alert.
