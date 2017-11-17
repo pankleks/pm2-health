@@ -35,7 +35,7 @@ It can:
 
 ### Probes monitoring
 
-`pm2-health` can monitor any Pmx probe defined in apps you run with pm2.
+`pm2-health` can monitor any PMX probe defined in apps you run with pm2.
 In `Probes.js` file you can define which probes should be monitored, and what triggers an alert.
 
 ```js
@@ -58,7 +58,7 @@ const probes = {
 
 > All alerts are grouped in single mail
 
-To learn how to define probe for your app see: http://pm2.keymetrics.io/docs/usage/process-metrics/
+To learn how to define PMX probes for your app see: http://pm2.keymetrics.io/docs/usage/process-metrics/
 
 ### Mail template
 
