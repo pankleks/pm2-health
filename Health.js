@@ -51,7 +51,7 @@ class Health {
                         return;
                     if (Array.isArray(this._config.events) && this._config.events.indexOf(data.event) === -1)
                         return;
-                    this.mail(`${data.process.name}:${data.process.pm_id} - ${data.event}`, `<p>App: <b>${data.process.name}:${data.process.pm_id}</b></p><p>Event: <b>${data.event}</b></p><pre>${JSON.stringify(data, undefined, 4)}</pre>`, LOGS.filter(e => data.process[e]).map(e => ({ filename: path_1.basename(data.process[e]), path: data.process[e] })));
+                    this.mail(`${data.process.name}:${data.process.pm_id} - ${data.event}`, `<p>App: <b>${data.process.name}:${data.process.pm_id}</b></p><p>Event: <b>${data.event}</b></p><pre>${JSON.stringify(data, undefined, 4)}</pre>`, LOGS.filter(e => this._config.addLogs === true && data.process[e]).map(e => ({ filename: path_1.basename(data.process[e]), path: data.process[e] })));
                 });
             });
             this.testProbes();
@@ -117,7 +117,7 @@ class Health {
             if (alerts.length > 0)
                 this.mail(`${alerts.length} alert(s)`, `<table>
                         <tr>
-                            <th>App</th><th>Probe</th><th>Value</th><th>Target</th>
+                            <th>App</th><th>Metric</th><th>Value</th><th>Target</th>
                         </tr>
                         ${alerts.join("")}
                     </table>`);

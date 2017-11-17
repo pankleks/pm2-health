@@ -32,7 +32,8 @@ After installation, find `pm2-health` section in `module_conf.json` file in PM2 
         "op": ">"
     }
 },
-"probeIntervalM": 1
+"probeIntervalM": 1,
+"addLogs": true
 ```
 `smtp` - SMTP server configuration. If your SMTP doesn't require auth, leave `smtp.user` empty
 
@@ -44,7 +45,9 @@ After installation, find `pm2-health` section in `module_conf.json` file in PM2 
 
 `probes` - object describing PMX metrics to be monitored (optional). See  [Metrics monitoring](#metrics-monitoring)
 
-`probeIntervalM` - how often PMX metrics will be tested [in minutes] (optional) - if not set, 1 minute is used
+`probeIntervalM` - how often PMX metrics will be tested in minutes (optional). If not set, 1 minute is used
+
+`addLogs` - if `true` app logs will be added as mail attachement (optional)
 
 > if any of required parameters are not defined, `pm2-health` will shutdown. You can check error logs for details.
 
@@ -72,7 +75,7 @@ To configure rules of alerting, setup `probes` section in module config file.
 
 `ifChanged` - if `true`, alert will trigger only if current metric value is different from last recorded value (optional)
 
-`disabled` - if `true`, metric won't be tested
+`disabled` - if `true`, metric won't be tested (optional)
 
 > Learn how to define PMX probes in your apps here: http://pm2.keymetrics.io/docs/usage/process-metrics/
 
