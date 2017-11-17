@@ -89,6 +89,8 @@ To hold mail notification: `pm2 trigger pm2-health hold`
 
 To unhold immediatelly: `pm2 trigger pm2-health unhold`
 
+> All monitoring processes continues, just mail notification is held
+
 ## Mail template
 
 Mail uses HTML format. To adjust template, you can edit [Template.html](./Template.html)
