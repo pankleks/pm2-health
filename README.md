@@ -2,7 +2,7 @@
 Apps health monitor and mail notification module for pm2
 
 It can:
-* Monitor events (like app crash, restart etc) and send mail with logs as attachement
+* Monitor events (like app crash, restart etc.) and send mail with logs as attachement
 * Monitor PMX probes defined in apps and send mail with alerts when value hits treshold
 
 ## Configuration
@@ -31,6 +31,8 @@ It can:
 
 `probeIntervalM` - how often PMX probes should be tested [minutes] (optional) - if not set, 1 minute is used
 
+> if any of required parameters are not defined, `pm2-health` will shutdown. You can check error logs for details.
+
 ### Probes monitor
 
 `pm2-health` can monitor any Pmx probe defined in apps you run with pm2.
@@ -54,7 +56,9 @@ const probes = {
 `fn` - function to compare current value and target, should return `true` to trigger an alert
 `ifChanged` - if set to `true`, alert will fire only if probe value has changed (compared to previous one)
 
-> All alerts are grouped in single mail 
+> All alerts are grouped in single mail
+
+To learn how to define probe for your app see: http://pm2.keymetrics.io/docs/usage/process-metrics/
 
 ### Mail template
 
