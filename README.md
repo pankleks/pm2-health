@@ -59,4 +59,5 @@ const probes = {
 ### Mail template
 
 Mail is send in HTML format, you can adjust template in `Template.html` file.
+
 Just place `<!-- body -->` inside HTML where mail body should be pasted.
