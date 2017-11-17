@@ -18,7 +18,7 @@ After installation, find `pm2-health` section in `module_conf.json` file in PM2 
     "port": 587,
     "user": "your-smtp-user",
     "password": "your-smtp-password"
-    },
+},
 "mailTo": "mail1,mail2",
 "replyTo": "",
 "events": ["exit"],
@@ -62,8 +62,7 @@ To configure rules of alerting, setup `probes` section in module config file.
         "target": 0,
         "op": ">",
         "ifChanged": true
-    },
-    ...
+    }    
 }
 ```
 `metric name` - name of metric defined in one of your apps
