@@ -8,6 +8,14 @@ import { basename } from "path";
 const PROBE_INTERVAL_M = 1;
 const HOLD_PERIOD_M = 30;
 const LOGS = ["pm_err_log_path", "pm_out_log_path"];
+const OP = {
+    "<": (a, b) => a < b,
+    ">": (a, b) => a > b,
+    "=": (a, b) => a === b,
+    "<=": (a, b) => a <= b,
+    ">=": (a, b) => a >= b,
+    "!=": (a, b) => a != b
+}
 
 interface IConfig {
     smtp: {
@@ -19,20 +27,18 @@ interface IConfig {
     mailTo: string;
     replyTo: string;
     events: string[];
-    probeIntervalM: number;
-}
-
-interface IProbes {
-    [key: string]: {
-        target: number;
-        fn: (v, t) => boolean;
-        ifChanged?: boolean;
+    probes: {
+        [key: string]: {
+            target: number;
+            op: "<" | ">" | "=" | "<=" | ">=" | "!=";
+            ifChanged: boolean;
+        }
     }
+    probeIntervalM: number;
 }
 
 export class Health {
     _template = "<p><!-- body --></p><p><!-- timeStamp --></p>";
-    _probes: IProbes = {};
     _holdTill: Date = null;
 
     _history: {
@@ -58,12 +64,6 @@ export class Health {
         }
         catch {
             console.log(`Template.html not found`);
-        }
-        try {
-            this._probes = require("./Probes.js");                    
-        }
-        catch {
-            console.log(`Probes.js not found`);
         }
 
         console.log(`pm2-health is on`);
@@ -149,7 +149,7 @@ export class Health {
 
                 for (let key of Object.keys(monit)) {
                     let
-                        probe = this._probes[key];
+                        probe = this._config.probes[key];
                     if (!probe || probe.target == null)
                         continue;
 
@@ -157,8 +157,13 @@ export class Health {
                         v = parseFloat(monit[key].value);
                     if (isNaN(v) || isNaN(probe.target))
                         continue;
+                    
+                    let
+                        fn = OP[probe.op];
+                    if (!fn)
+                        continue;
 
-                    if (probe.fn(v, probe.target) === true && (probe.ifChanged !== true || this._history[e.pid] !== v)) {
+                    if (fn(v, probe.target) === true && (probe.ifChanged !== true || this._history[e.pid] !== v)) {
                         this._history[e.pid] = v;
                         alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${probe.target}</td></tr>`);
                     }

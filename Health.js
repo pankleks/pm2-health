@@ -9,11 +9,18 @@ const path_1 = require("path");
 const PROBE_INTERVAL_M = 1;
 const HOLD_PERIOD_M = 30;
 const LOGS = ["pm_err_log_path", "pm_out_log_path"];
+const OP = {
+    "<": (a, b) => a < b,
+    ">": (a, b) => a > b,
+    "=": (a, b) => a === b,
+    "<=": (a, b) => a <= b,
+    ">=": (a, b) => a >= b,
+    "!=": (a, b) => a != b
+};
 class Health {
     constructor(_config) {
         this._config = _config;
         this._template = "<p><!-- body --></p><p><!-- timeStamp --></p>";
-        this._probes = {};
         this._holdTill = null;
         this._history = {};
         if (!this._config.smtp)
@@ -33,12 +40,6 @@ class Health {
         }
         catch (_a) {
             console.log(`Template.html not found`);
-        }
-        try {
-            this._probes = require("./Probes.js");
-        }
-        catch (_b) {
-            console.log(`Probes.js not found`);
         }
         console.log(`pm2-health is on`);
         PM2.connect((ex) => {
@@ -98,13 +99,16 @@ class Health {
                 if (!monit)
                     continue;
                 for (let key of Object.keys(monit)) {
-                    let probe = this._probes[key];
+                    let probe = this._config.probes[key];
                     if (!probe || probe.target == null)
                         continue;
                     let v = parseFloat(monit[key].value);
                     if (isNaN(v) || isNaN(probe.target))
                         continue;
-                    if (probe.fn(v, probe.target) === true && (probe.ifChanged !== true || this._history[e.pid] !== v)) {
+                    let fn = OP[probe.op];
+                    if (!fn)
+                        continue;
+                    if (fn(v, probe.target) === true && (probe.ifChanged !== true || this._history[e.pid] !== v)) {
                         this._history[e.pid] = v;
                         alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${probe.target}</td></tr>`);
                     }

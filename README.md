@@ -18,19 +18,32 @@ After installation, find `pm2-health` section in `module_conf.json` file in PM2 
     "port": 587,
     "user": "your-smtp-user",
     "password": "your-smtp-password"
-},
+    },
 "mailTo": "mail1,mail2",
 "replyTo": "",
 "events": ["exit"],
+"probes": {
+    "execution / min": {
+        "target": 0.5,
+        "op": "<="
+    },
+    "failed execution count": {
+        "target": 0,
+        "op": ">",
+        "ifChanged": true
+    }
+},
 "probeIntervalM": 1
 ```
-`smtp` - SMTP server configuration. If your SMTP doesn't require authentication, leave `smtp.user` field empty
+`smtp` - SMTP server configuration. If your SMTP doesn't require auth, leave `smtp.user` empty
 
 `mailTo` - comma separated list of notification receipients
 
 `replyTo` - reply to address (optional)
 
 `events` - list of events to monitor (optional) - if not set, all events will be monitored
+
+`probes` - object describing PMX metrics to be monitored (optional). See  [Metrics monitoring](#metrics-monitoring)
 
 `probeIntervalM` - how often PMX metrics will be tested [in minutes] (optional) - if not set, 1 minute is used
 
@@ -40,41 +53,28 @@ After installation, find `pm2-health` section in `module_conf.json` file in PM2 
 
 `pm2-health` can monitor any PMX metrics defined in your apps.
 
-To configure metrics probes, create `Probes.js` or copy [Samples/Probes.js](./Samples/Probes.js) file into `pm2-health` module folder (typically `~/.pm2/node_modules/pm2-health`)
+To configure rules of alerting, setup `probes` section in module config file.
 
-```js
-const probes = {
-    // pmx probe name
-    "execution / min": {
-        target: 0.5,    // target number value
-        fn: function (v, t) {
-            // v - current value
-            // t - target
-            return v <= t;  // return true to trigger an alert
-        }
+```json
+...
+"probes": {
+    "metric name": {
+        "target": 0,
+        "op": ">",
+        "ifChanged": true
     },
-    "failed execution count": {
-        target: 0,
-        fn: (v, t) => v > t,    // if Node allows, you can use arrow functions too
-        ifChanged: true // if true, alert triggers only if value changed compared to previous reading
-    }
+    ...
 }
-
-// module exports (don't forget)
-module.exports = probes;
 ```
+`metric name` - name of metric defined in one of your apps
 
-> After changing `Probes.js` file, please do `pm2 restart pm2-health`
+`target` - target numeric value
 
-> Learn how to define PMX probes for your apps here: http://pm2.keymetrics.io/docs/usage/process-metrics/
+`op` - operator to compare metric value and target. Can be one of: `<`, `>`, `=`, `<=`, `>=`, `!=`
 
-## Mail template
+`ifChanged` - if set to `true`, alert will trigger only if current metric value is different from last recorded value (optional)
 
-Mail uses HTML format. To adjust template, create `Template.html` or copy [Samples/Template.html](./Samples/Template.html) file into `pm2-health` module folder (typically `~/.pm2/node_modules/pm2-health`)
-
-`<!-- body -->` will be exchanged with actual message body.
-
-`<!-- timeStamp -->` will be exchanged with event timestamp (UTC).
+> Learn how to define PMX probes in your apps here: http://pm2.keymetrics.io/docs/usage/process-metrics/
 
 ## Holding notifications temporarily
 
@@ -83,6 +83,16 @@ To hold mail notification for 30 minutes execute command:
 `pm2 trigger pm2-health hold`
 
 After 30 minutes, notifications will start automatically. It's usefull during planned maintanance.
+
+## Mail template
+
+Mail uses HTML format. To adjust template, you can edit [Template.html](./Template.html)
+
+`<!-- body -->` will be exchanged with actual message body.
+
+`<!-- timeStamp -->` will be exchanged with event timestamp (UTC).
+
+> `pm2-health` update will override your `Template.html`, so keep backup :blush:
 
 ## Building
 
