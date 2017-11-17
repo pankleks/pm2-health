@@ -36,6 +36,7 @@ It can:
 ## Probes monitoring
 
 `pm2-health` can monitor any PMX probe defined in apps you run with pm2.
+
 In `Probes.js` file you can define which probes should be monitored, and what triggers an alert.
 
 ```js
