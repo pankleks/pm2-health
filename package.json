@@ -16,6 +16,9 @@
     "@types/node": "^8.0.52",
     "@types/nodemailer": "^4.3.1"
   },
+  "keywords": [
+    "pm2", "pmx", "monitor", "mail", "module"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pankleks/pm2-health"
