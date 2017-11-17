@@ -17,7 +17,11 @@
     "@types/nodemailer": "^4.3.1"
   },
   "keywords": [
-    "pm2", "pmx", "monitor", "mail", "module"
+    "pm2",
+    "pmx",
+    "monitor",
+    "mail",
+    "module"
   ],
   "repository": {
     "type": "git",
