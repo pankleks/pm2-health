@@ -44,6 +44,7 @@
         "disable": true
       }
     },
-    "probeIntervalM": 1
+    "probeIntervalM": 1,
+    "addLogs": true
   }
 }
