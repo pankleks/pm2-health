@@ -1,7 +1,8 @@
 # pm2-health
-This PM2 module allows you to:
-* Monitor events (like app crash, restarts etc.) and send mail with logs as attachement
-* Monitor PMX metrics and send alerts when value hits treshold
+This [PM2](http://pm2.keymetrics.io/) module is:
+* Monitoring events (like app crash, restarts etc.)
+* Monitoring PMX metrics of your apps and send alerts when value hits treshold
+* Sending mail notifications
 
 ## Installation
 
@@ -71,7 +72,7 @@ module.exports = probes;
 
 Mail uses HTML format. To adjust template, create `Template.html` or copy [Samples/Template.html](./Samples/Template.html) file into `pm2-health` module folder (typically `~/.pm2/node_modules/pm2-health`)
 
-`<!-- body -->` inside template will be exchanged with actual message body.
+`<!-- body -->` will be exchanged with actual message body.
 
 `<!-- timeStamp -->` will be exchanged with event timestamp (UTC).
 
