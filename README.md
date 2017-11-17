@@ -10,7 +10,7 @@ This [PM2](http://pm2.keymetrics.io/) module is:
 
 ## Configuration
 
-After installation, find `pm2-health` section in `module_conf.json` file in PM2 home folder (typically `~/.pm2/`)
+After installation, find `pm2-health` section in `module_conf.json` file in PM2 home folder (typically `~/.pm2/`) or run `pm2 conf`, if you breave enough to use vi :smile:
 
 ```json
 "smtp": {
