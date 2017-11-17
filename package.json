@@ -22,12 +22,12 @@
   },
   "config": {
     "smtp": {
-      "host": "",
+      "host": "your-smtp-host",
       "port": 587,
-      "user": "",
-      "password": ""
+      "user": "your-smtp-user",
+      "password": "your-smtp-password"
     },
-    "mailTo": "",
+    "mailTo": "mail1,mail2",
     "replyTo": "",
     "events": [
       "exit"

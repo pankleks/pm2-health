@@ -102,9 +102,9 @@ class Health {
                     if (!probe || probe.target == null)
                         continue;
                     let v = parseFloat(monit[key].value);
-                    if (isNaN(v))
+                    if (isNaN(v) || isNaN(probe.target))
                         continue;
-                    if (probe.fn(v, probe.target) === true && (!probe.ifChanged || this._history[e.pid] !== v)) {
+                    if (probe.fn(v, probe.target) === true && (probe.ifChanged !== true || this._history[e.pid] !== v)) {
                         this._history[e.pid] = v;
                         alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${probe.target}</td></tr>`);
                     }

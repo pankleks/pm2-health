@@ -5,20 +5,22 @@ It can:
 * Monitor events (like app crash, restart etc.) and send mail with logs as attachement
 * Monitor PMX probes send mail alerts when value hits treshold
 
+## Installation
+
+`pm2 install pankleks/pm2-health`
+
 ## Configuration
 
 ```json
 "smtp": {
-  "host": "",
-  "port": 587,
-  "user": "",
-  "password": ""
+    "host": "your-smtp-host",
+    "port": 587,
+    "user": "your-smtp-user",
+    "password": "your-smtp-password"
 },
-"mailTo": "",
+"mailTo": "mail1,mail2",
 "replyTo": "",
-"events": [
-  "exit"
-],
+"events": ["exit"],
 "probeIntervalM": 1
 ```
 `smtp` - SMTP server configuration
