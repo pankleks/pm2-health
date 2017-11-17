@@ -81,11 +81,13 @@ To configure rules of alerting, setup `probes` section in module config file.
 
 > Learn how to define PMX probes in your apps here: http://pm2.keymetrics.io/docs/usage/process-metrics/
 
-## Holding notifications temporarily
+## Hold notifications temporarily
 
-To hold mail notification for 30 minutes run: `pm2 trigger pm2-health hold`
+To hold mail notification: `pm2 trigger pm2-health hold`
 
-> After 30 minutes, notifications will restart automatically. It's usefull during planned maintanance.
+> Notifications will restart automatically after 30 minutes.
+
+To unhold immediatelly: `pm2 trigger pm2-health unhold`
 
 ## Mail template
 

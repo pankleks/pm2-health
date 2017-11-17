@@ -59,7 +59,11 @@ class Health {
         Pmx.action("hold", (reply) => {
             this._holdTill = new Date();
             this._holdTill.setTime(this._holdTill.getTime() + HOLD_PERIOD_M * 60000);
-            reply(`hold mail till ${this._holdTill.toISOString()}`);
+            reply(`mail held till ${this._holdTill.toISOString()}`);
+        });
+        Pmx.action("unhold", (reply) => {
+            this._holdTill = null;
+            reply(`mail unheld`);
         });
     }
     mail(subject, body, attachements = []) {
