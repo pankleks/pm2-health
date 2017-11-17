@@ -76,3 +76,10 @@ To hold mail notification for 30 minutes execute command:
 
 After 30 minutes, notifications will start automatically. It's usefull during planned maintanance.
 
+## Building
+
+`pm2-health` is written using TypeScript with ES2017 target. 
+
+ES2017 is supported by Node 8+, if you need to use ealier version of Node, please build solution using different target in `tsconfig.json`. 
+
+Also in `Probes.js`, use `function` instead `=>` syntax.
