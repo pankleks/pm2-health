@@ -1,8 +1,6 @@
 # pm2-health
-Apps health monitor and mail notification module for pm2
-
-It can:
-* Monitor events (like app crash, restart etc.) and send mail with logs as attachement
+This PM2 module allows you to:
+* Monitor events (like app crash, restarts etc.) and send mail with logs as attachement
 * Monitor PMX metrics and send alerts when value hits treshold
 
 ## Installation
@@ -10,6 +8,8 @@ It can:
 `pm2 install pankleks/pm2-health`
 
 ## Configuration
+
+After installation, find `pm2-health` section in `module_conf.json` file in PM2 home folder (typically `~/.pm2/`)
 
 ```json
 "smtp": {
@@ -23,7 +23,7 @@ It can:
 "events": ["exit"],
 "probeIntervalM": 1
 ```
-`smtp` - SMTP server configuration
+`smtp` - SMTP server configuration. If your SMTP doesn't require authentication, leave `smtp.user` field empty
 
 `mailTo` - comma separated list of notification receipients
 
@@ -31,7 +31,7 @@ It can:
 
 `events` - list of events to monitor (optional) - if not set, all events will be monitored
 
-`probeIntervalM` - how often PMX probes should be tested [minutes] (optional) - if not set, 1 minute is used
+`probeIntervalM` - how often PMX metrics will be tested [in minutes] (optional) - if not set, 1 minute is used
 
 > if any of required parameters are not defined, `pm2-health` will shutdown. You can check error logs for details.
 
