@@ -63,9 +63,7 @@ const probes = {
 module.exports = probes;
 ```
 
-* Use [Probes.js](./Samples/Probes.js) as starting point
-
-* `Probes.js` file must be in PM2 home folder under `node_modules/pm2-health`
+* As starting point, copy [Probes.js](./Samples/Probes.js) to your PM2 home folder under `node_modules/pm2-health`
 
 * After changing `Probes.js` file, please do `pm2 restart pm2-health`
 
@@ -81,7 +79,7 @@ Mail is send in HTML format, you can adjust template in `Template.html` file.
 
 Just place `<!-- body -->` inside HTML where mail body should be pasted.
 
-* Use [Template.html](./Samples/Template.html) as starting point
+* As starting point, copy [Template.html](./Samples/Template.html) to your PM2 home folder under `node_modules/pm2-health`
 
 ## Holding notifications temporarily
 
@@ -95,6 +93,4 @@ After 30 minutes, notifications will start automatically. It's usefull during pl
 
 `pm2-health` is written using TypeScript with ES2017 target. 
 
-ES2017 is supported by Node 8+, if you need to use ealier version of Node, please build solution using different target in `tsconfig.json`. 
-
-Also in `Probes.js`, use `function` instead `=>` syntax.
+ES2017 is supported by Node 8+, if you need to use ealier version of Node, please build solution using different target in `tsconfig.json`.
