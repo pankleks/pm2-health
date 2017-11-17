@@ -3,7 +3,7 @@ Apps health monitor and mail notification module for pm2
 
 It can:
 * Monitor events (like app crash, restart etc.) and send mail with logs as attachement
-* Monitor PMX probes defined in apps and send mail with alerts when value hits treshold
+* Monitor PMX probes send mail alerts when value hits treshold
 
 ## Configuration
 
@@ -54,7 +54,7 @@ const probes = {
 
 `target` - target value for probe
 `fn` - function to compare current value and target, should return `true` to trigger an alert
-`ifChanged` - if set to `true`, alert will fire only if probe value has changed (compared to previous one)
+`ifChanged` - if set to `true`, alert will fire only if probe value has changed (optional)
 
 > All alerts are grouped in single mail
 
