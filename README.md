@@ -41,7 +41,9 @@ After installation, find `pm2-health` section in `module_conf.json` file in PM2 
 
 `replyTo` - reply to address (optional)
 
-`events` - list of events to monitor (optional) - if not set, all events will be monitored
+`events` - list of events to monitor (optional). If not set, all events will be monitored. 
+
+> Manually triggered events will not send notification.
 
 `probes` - object describing PMX metrics to be monitored (optional). See  [Metrics monitoring](#metrics-monitoring)
 
