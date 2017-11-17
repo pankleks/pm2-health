@@ -63,15 +63,15 @@ const probes = {
 module.exports = probes;
 ```
 
-> See more in `SampleProbes.js`
+* Use [Probes.js](./Samples/Probes.js) as starting point
 
-> `Probes.js` file must be in PM2 home folder under `node_modules/pm2-health`
+* `Probes.js` file must be in PM2 home folder under `node_modules/pm2-health`
 
-> After changing `Probes.js` file, please do `pm2 restart pm2-health`
+* After changing `Probes.js` file, please do `pm2 restart pm2-health`
 
-> All alerts are grouped in single mail
+* All alerts are grouped in single mail
 
-> Since build-in PMX probe alerting settings are used only by https://keymetrics.io/, they are ignored by `pm2-health`
+* Since build-in PMX probe alerting settings are used only by https://keymetrics.io/, they are ignored by `pm2-health`
 
 > Learn how to define PMX probes for your apps here: http://pm2.keymetrics.io/docs/usage/process-metrics/
 
@@ -80,6 +80,8 @@ module.exports = probes;
 Mail is send in HTML format, you can adjust template in `Template.html` file.
 
 Just place `<!-- body -->` inside HTML where mail body should be pasted.
+
+* Use [Template.html](./Samples/Template.html) as starting point
 
 ## Holding notifications temporarily
 
