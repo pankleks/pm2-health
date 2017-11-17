@@ -3,7 +3,7 @@ Apps health monitor and mail notification module for pm2
 
 It can:
 * Monitor events (like app crash, restart etc.) and send mail with logs as attachement
-* Monitor PMX probes send mail alerts when value hits treshold
+* Monitor PMX metrics and send alerts when value hits treshold
 
 ## Installation
 
@@ -35,11 +35,11 @@ It can:
 
 > if any of required parameters are not defined, `pm2-health` will shutdown. You can check error logs for details.
 
-## Probes monitoring
+## Metrics monitoring
 
-`pm2-health` can monitor any PMX probe defined in apps you run with pm2.
+`pm2-health` can monitor any PMX metrics defined in your apps.
 
-Assuming some of your apps define PMX probes named `execution / min` and `failed execution count` you can define alerting rules in `Probes.js`:
+To configure metrics probes, create `Probes.js` or copy [Samples/Probes.js](./Samples/Probes.js) file into `pm2-health` module folder (typically `~/.pm2/node_modules/pm2-health`)
 
 ```js
 const probes = {
@@ -63,23 +63,17 @@ const probes = {
 module.exports = probes;
 ```
 
-* As starting point, copy [Probes.js](./Samples/Probes.js) to your PM2 home folder under `node_modules/pm2-health`
-
-* After changing `Probes.js` file, please do `pm2 restart pm2-health`
-
-* All alerts are grouped in single mail
-
-* Since build-in PMX probe alerting settings are used only by https://keymetrics.io/, they are ignored by `pm2-health`
+> After changing `Probes.js` file, please do `pm2 restart pm2-health`
 
 > Learn how to define PMX probes for your apps here: http://pm2.keymetrics.io/docs/usage/process-metrics/
 
 ## Mail template
 
-Mail is send in HTML format, you can adjust template in `Template.html` file.
+Mail uses HTML format. To adjust template, create `Template.html` or copy [Samples/Template.html](./Samples/Template.html) file into `pm2-health` module folder (typically `~/.pm2/node_modules/pm2-health`)
 
-Just place `<!-- body -->` inside HTML where mail body should be pasted.
+`<!-- body -->` inside template will be exchanged with actual message body.
 
-* As starting point, copy [Template.html](./Samples/Template.html) to your PM2 home folder under `node_modules/pm2-health`
+`<!-- timeStamp -->` will be exchanged with event timestamp (UTC).
 
 ## Holding notifications temporarily
 
