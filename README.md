@@ -43,23 +43,31 @@ Assuming some of your apps define PMX probes named `execution / min` and `failed
 
 ```js
 const probes = {
+    // pmx probe name
     "execution / min": {
-        target: 0.5,
-        fn: (v, t) => v <= t
+        target: 0.5,    // target number value
+        fn: function (v, t) {
+            // v - current value
+            // t - target
+            return v <= t;  // return true to trigger an alert
+        }
     },
     "failed execution count": {
         target: 0,
-        fn: (v, t) => v > t,
-        ifChanged: true
+        fn: (v, t) => v > t,    // if Node allows, you can use arrow functions too
+        ifChanged: true // if true, alert triggers only if value changed compared to previous reading
     }
 }
+
+// module exports (don't forget)
+module.exports = probes;
 ```
 
-`target` - target value for probe
+> See more in `SampleProbes.js`
 
-`fn` - function to compare current value (`v`) and target (`t`). Should return `true` to trigger an alert
+> `Probes.js` file must be in PM2 home folder under `node_modules/pm2-health`
 
-`ifChanged` - if set to `true`, alert will fire only if probe value has changed (optional)
+> After changing `Probes.js` file, please do `pm2 restart pm2-health`
 
 > All alerts are grouped in single mail
 
