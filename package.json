@@ -40,16 +40,6 @@
       "exit"
     ],
     "probes": {
-      "execution / min": {
-        "target": 0.5,
-        "op": "<="
-      },
-      "failed execution count": {
-        "target": 0,
-        "op": ">",
-        "ifChanged": true,
-        "disable": true
-      }
     },
     "probeIntervalM": 1,
     "addLogs": true

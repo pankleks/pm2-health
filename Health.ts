@@ -45,7 +45,6 @@ export class Health {
     }
 
     go() {
-
         console.log(`pm2-health is on`);
 
         PM2.connect((ex) => {
@@ -63,7 +62,10 @@ export class Health {
 
                     this.mail(
                         `${data.process.name}:${data.process.pm_id} - ${data.event}`,
-                        `<p>App: <b>${data.process.name}:${data.process.pm_id}</b></p><p>Event: <b>${data.event}</b></p><pre>${JSON.stringify(data, undefined, 4)}</pre>`,
+                        `
+                        <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
+                        <p>Event: <b>${data.event}</b></p>
+                        <pre>${JSON.stringify(data, undefined, 4)}</pre>`,
                         LOGS.filter(e => this._config.addLogs === true && data.process[e]).map(e => ({ filename: basename(data.process[e]), path: data.process[e] })));
                 });
             });
@@ -147,7 +149,8 @@ export class Health {
             if (alerts.length > 0)
                 this.mail(
                     `${alerts.length} alert(s)`,
-                    `<table>
+                    `
+                    <table>
                         <tr>
                             <th>App</th><th>Metric</th><th>Value</th><th>Target</th>
                         </tr>
