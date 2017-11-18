@@ -103,6 +103,10 @@ Mail uses HTML format. To adjust template, you can edit [Template.html](./Templa
 
 > `pm2-health` update will override your `Template.html`, so keep backup :blush:
 
+## Testing mail
+
+To send test mail: `pm2 trigger pm2-health mail`
+
 ## Building
 
 `pm2-health` is written using TypeScript 2.6.1+ with `es2017` target. 

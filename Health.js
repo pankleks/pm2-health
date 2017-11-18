@@ -2,10 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const PM2 = require("pm2");
 const Pmx = require("pmx");
-const Fs = require("fs");
-const Mailer = require("nodemailer");
-const os_1 = require("os");
 const path_1 = require("path");
+const Mail_1 = require("./Mail");
 const PROBE_INTERVAL_M = 1;
 const HOLD_PERIOD_M = 30;
 const LOGS = ["pm_err_log_path", "pm_out_log_path"];
@@ -20,27 +18,13 @@ const OP = {
 class Health {
     constructor(_config) {
         this._config = _config;
-        this._template = "<p><!-- body --></p><p><!-- timeStamp --></p>";
         this._holdTill = null;
         this._history = {};
-        if (!this._config.smtp)
-            throw new Error(`[smpt] not set`);
-        if (!this._config.smtp.host)
-            throw new Error(`[smtp.host] not set`);
-        if (!this._config.smtp.port)
-            throw new Error(`[smtp.port] not set`);
-        if (!this._config.mailTo)
-            throw new Error(`[mailTo] not set`);
+        this._mail = new Mail_1.Mail(_config);
         if (this._config.probeIntervalM == null)
             this._config.probeIntervalM = PROBE_INTERVAL_M;
     }
     go() {
-        try {
-            this._template = Fs.readFileSync("Template.html", "utf8");
-        }
-        catch (_a) {
-            console.log(`Template.html not found`);
-        }
         console.log(`pm2-health is on`);
         PM2.connect((ex) => {
             stopIfEx(ex);
@@ -65,34 +49,27 @@ class Health {
             this._holdTill = null;
             reply(`mail unheld`);
         });
+        Pmx.action("mail", async (reply) => {
+            try {
+                await this._mail.send("Test only", "This is test only.");
+                reply(`mail send`);
+            }
+            catch (ex) {
+                reply(`mail failed: ${ex.message || ex}`);
+            }
+        });
     }
-    mail(subject, body, attachements = []) {
+    async mail(subject, body, attachements = []) {
         let t = new Date();
         if (this._holdTill != null && t < this._holdTill)
             return; // skip
-        let temp = {
-            host: this._config.smtp.host,
-            port: this._config.smtp.port,
-            auth: null
-        };
-        if (this._config.smtp.user)
-            temp.auth = {
-                user: this._config.smtp.user,
-                pass: this._config.smtp.password
-            };
-        let transport = Mailer.createTransport(temp);
-        transport.sendMail({
-            to: this._config.mailTo,
-            from: this._config.smtp.user,
-            replyTo: this._config.replyTo,
-            subject: `pm2-health: ${os_1.hostname()}, ${subject}`,
-            html: this._template.replace(/<!--\s*body\s*-->/, body).replace(/<!--\s*timeStamp\s*-->/, new Date().toISOString()),
-            attachments: attachements
-        }).then(() => {
-            console.log(subject);
-        }).catch(ex => {
-            console.error(`can't send mail, ${ex.message || ex}`);
-        });
+        try {
+            await this._mail.send(subject, body, attachements);
+            console.log(`mail send: ${subject}`);
+        }
+        catch (ex) {
+            console.error(`mail failed: ${ex.message || ex}`);
+        }
     }
     testProbes() {
         let alerts = [];
