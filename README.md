@@ -10,7 +10,7 @@ This [PM2](http://pm2.keymetrics.io/) module is:
 
 ## Configuration
 
-After installation run `pm2 conf` to configure module. You can also edit `module_conf.json` file directly (in PM2 home folder).
+After installation run `pm2 conf` to configure module. Alternatively edit `module_conf.json` file directly (in PM2 home folder).
 
 ```json
 "pm2-health": {
@@ -53,7 +53,7 @@ After installation run `pm2 conf` to configure module. You can also edit `module
 
 `addLogs` - if `true` app logs will be added as mail attachement (optional)
 
-> if any of required parameters are not defined, `pm2-health` will shutdown. You can check error logs for details.
+> if any of required parameters is not defined, `pm2-health` will shutdown. You can check error logs for details.
 
 ## Metrics monitoring
 
