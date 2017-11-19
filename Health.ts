@@ -121,6 +121,14 @@ export class Health {
             console.error(`mail failed: ${ex.message || ex}`);
         }
     }
+
+    historyAdd(pid: number, key: string, value: any) {
+        this._history[pid + key] = value;
+    }
+
+    historyLast(pid: number, key: string) {
+        return this._history[pid + key];
+    }
    
     private testProbes() {
         let
@@ -151,8 +159,8 @@ export class Health {
                     if (!fn)
                         continue;
 
-                    if (fn(v, probe.target) === true && (probe.ifChanged !== true || this._history[e.pid + key] !== v)) {
-                        this._history[e.pid + key] = v;
+                    if (fn(v, probe.target) === true && (probe.ifChanged !== true || this.historyLast(e.pid, key) !== v)) {
+                        this.historyAdd(e.pid, key, v);
                         alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${probe.target}</td></tr>`);
                     }
                 }
