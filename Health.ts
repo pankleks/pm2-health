@@ -77,8 +77,8 @@ export class Health {
                             this.mail(
                                 `${data.process.name}:${data.process.pm_id} - exception`,
                                 `
-                            <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
-                            <pre>${JSON.stringify(data.data, undefined, 4)}</pre>`);
+                                <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>                            
+                                <pre>${JSON.stringify(data.data, undefined, 4)}</pre>`);
                         }
                     });
 
