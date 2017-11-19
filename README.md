@@ -50,7 +50,9 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 `exceptions` - if `true` apps exceptions will be monitored (optional)
 
-`probes` - object describing PMX metrics to be monitored (optional). See  [Metrics monitoring](#metrics-monitoring)
+`messages` - if `true` apps custom messages will be monitored (optional). See [Custom messages](#custom-messages)
+
+`probes` - object describing PMX metrics to be monitored (optional). See [Metrics monitoring](#metrics-monitoring)
 
 `probeIntervalM` - how often PMX metrics will be tested in minutes (optional). If not set, 1 minute is used
 
@@ -85,6 +87,22 @@ To configure rules of alerting, setup `probes` section in module config file.
 `disabled` - if `true`, metric won't be tested (optional)
 
 > Learn how to define PMX probes in your apps here: http://pm2.keymetrics.io/docs/usage/process-metrics/
+
+## Custom messages
+
+On top of standard PM2 events, you can send custom messages from your apps.
+
+To send message from your app use:
+```javascript
+process.send({
+    type : "process:msg",    
+    data : {
+        ...
+    }
+});
+```
+
+> Lean more here: http://pm2.keymetrics.io/docs/usage/pm2-api/#send-message-to-process
 
 ## Hold notifications temporarily
 

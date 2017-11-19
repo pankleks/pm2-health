@@ -40,6 +40,7 @@
       "exit"
     ],
     "exceptions": true,
+    "messages": true,
     "probes": {},
     "probeIntervalM": 1,
     "addLogs": true
