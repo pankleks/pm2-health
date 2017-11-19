@@ -45,7 +45,7 @@ class Health {
                         if (data.process.name !== "pm2-health") {
                             this.mail(`${data.process.name}:${data.process.pm_id} - exception`, `
                             <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
-                            <pre>${JSON.stringify(data.data)}</pre>`);
+                            <pre>${JSON.stringify(data.data, undefined, 4)}</pre>`);
                         }
                     });
             });
