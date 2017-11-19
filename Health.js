@@ -48,6 +48,12 @@ class Health {
                             <pre>${JSON.stringify(data.data, undefined, 4)}</pre>`);
                         }
                     });
+                if (this._config.messages)
+                    bus.on("process:msg", (data) => {
+                        this.mail(`${data.process.name}:${data.process.pm_id} - message`, `
+                            <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
+                            <pre>${JSON.stringify(data.data, undefined, 4)}</pre>`);
+                    });
             });
             this.testProbes();
         });
