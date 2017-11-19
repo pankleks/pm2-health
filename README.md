@@ -1,6 +1,7 @@
 # pm2-health
 This [PM2](http://pm2.keymetrics.io/) module is:
-* Monitoring events (like app crash, restarts etc.)
+* Monitoring events (like app exit, restart etc.)
+* Monitoring app exceptions
 * Monitoring PMX metrics of your apps and send alerts when value hits treshold
 * Sending mail notifications
 
@@ -46,6 +47,8 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 `events` - list of events to monitor (optional). If not set, all events will be monitored. 
 
 > Manually triggered events will not send notification.
+
+`exceptions` - if `true` apps exceptions will be monitored (optional)
 
 `probes` - object describing PMX metrics to be monitored (optional). See  [Metrics monitoring](#metrics-monitoring)
 

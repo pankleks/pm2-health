@@ -27,6 +27,7 @@ interface IConfig extends ISmtp {
     }
     probeIntervalM: number;
     addLogs: boolean;
+    exceptions: boolean;
 }
 
 export class Health {
@@ -68,6 +69,17 @@ export class Health {
                         <pre>${JSON.stringify(data, undefined, 4)}</pre>`,
                         LOGS.filter(e => this._config.addLogs === true && data.process[e]).map(e => ({ filename: basename(data.process[e]), path: data.process[e] })));
                 });
+
+                if (this._config.exceptions)
+                    bus.on("process:exception", (data) => {
+                        if (data.process.name !== "pm2-health") {
+                            this.mail(
+                                `${data.process.name}:${data.process.pm_id} - exception`,
+                                `
+                            <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
+                            <pre>${JSON.stringify(data.data)}</pre>`);
+                        }
+                    });
             });
 
             this.testProbes();
