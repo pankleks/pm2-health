@@ -121,7 +121,7 @@ export class Health {
             console.error(`mail failed: ${ex.message || ex}`);
         }
     }
-
+   
     private testProbes() {
         let
             alerts = [];
@@ -151,8 +151,8 @@ export class Health {
                     if (!fn)
                         continue;
 
-                    if (fn(v, probe.target) === true && (probe.ifChanged !== true || this._history[e.pid] !== v)) {
-                        this._history[e.pid] = v;
+                    if (fn(v, probe.target) === true && (probe.ifChanged !== true || this._history[e.pid + key] !== v)) {
+                        this._history[e.pid + key] = v;
                         alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${probe.target}</td></tr>`);
                     }
                 }
