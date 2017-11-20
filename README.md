@@ -31,27 +31,27 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
     "addLogs": true
 }
 ```
-`smtp` - SMTP server configuration. If your SMTP doesn't require auth, leave `smtp.user` empty
+* `smtp` - SMTP server configuration. If your SMTP doesn't require auth, leave `smtp.user` empty
 
-`mailTo` - comma separated list of notification receipients
+* `mailTo` - comma separated list of notification receipients
 
-`replyTo` - reply to address (optional)
+* `replyTo` - reply to address (optional)
 
-`events` - list of events to monitor (optional). If not set, all events will be monitored. 
+* `events` - list of events to monitor (optional). If not set, all events will be monitored. 
 
 > Manually triggered events will not send notification.
 
-`exceptions` - if `true` apps exceptions will be monitored (optional)
+* `exceptions` - if `true` apps exceptions will be monitored (optional)
 
-`messages` - if `true` apps custom messages will be monitored (optional). See [Custom messages](#custom-messages)
+* `messages` - if `true` apps custom messages will be monitored (optional). See [Custom messages](#custom-messages)
 
-`classes` - list of message classes to monitor (optional). See [Custom messages](#custom-messages)
+* `classes` - list of message classes to monitor (optional). See [Custom messages](#custom-messages)
 
-`probes` - object describing PMX metrics to be monitored (optional). See [Metrics monitoring](#metrics-monitoring)
+* `probes` - object describing PMX metrics to be monitored (optional). See [Metrics monitoring](#metrics-monitoring)
 
-`probeIntervalM` - how often PMX metrics will be tested in minutes (optional). If not set, 1 minute is used
+* `probeIntervalM` - how often PMX metrics will be tested in minutes (optional). If not set, 1 minute is used
 
-`addLogs` - if `true` app logs will be added as mail attachement (optional)
+* `addLogs` - if `true` app logs will be added as mail attachement (optional)
 
 > if any of required parameters is not defined, `pm2-health` will shutdown. You can check error logs for details.
 
@@ -74,15 +74,15 @@ To configure rules of alerting, setup `probes` section in module config file.
     }    
 }
 ```
-`metric name` - name of metric defined in one of your apps
+* `metric name` - name of metric defined in one of your apps
 
-`target` - target numeric value
+* `target` - target numeric value
 
-`op` - operator to compare metric value and target. Can be one of: `<`, `>`, `=`, `<=`, `>=`, `!=`
+* `op` - operator to compare metric value and target. Can be one of: `<`, `>`, `=`, `<=`, `>=`, `!=`
 
-`ifChanged` - if `true`, alert will trigger only if current metric value is different from last recorded value (optional)
+* `ifChanged` - if `true`, alert will trigger only if current metric value is different from last recorded value (optional)
 
-`disabled` - if `true`, metric won't be tested (optional)
+* `disabled` - if `true`, metric won't be tested (optional)
 
 > Learn how to define PMX probes in your apps here: http://pm2.keymetrics.io/docs/usage/process-metrics/
 
@@ -102,13 +102,13 @@ process.send({
 });
 ```
 
-`type` - must be `process:msg`
+* `type` - must be `process:msg`
 
-`class` - class of message (optional). Classes can be used to filter messages to monitor.
+* `class` - class of message (optional). Classes can be used to filter messages to monitor.
 
-`desc` - some description (optional). If exist it will be used as mail subject.
+* `desc` - some description (optional). If exist it will be used as mail subject.
 
-`data` - object containing additional data (optional)
+* `data` - object containing additional data (optional)
 
 > Lean more here: http://pm2.keymetrics.io/docs/usage/pm2-api/#send-message-to-process
 
