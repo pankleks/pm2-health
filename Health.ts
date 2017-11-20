@@ -29,6 +29,7 @@ interface IConfig extends ISmtp {
     addLogs: boolean;
     exceptions: boolean;
     messages: boolean;
+    classes: string[];
 }
 
 export class Health {
@@ -84,10 +85,15 @@ export class Health {
 
                 if (this._config.messages)
                     bus.on("process:msg", (data) => {
+                        if (data.class && Array.isArray(this._config.classes) && this._config.classes.indexOf(data.class) === -1)
+                            return;
+                            
                         this.mail(
-                            `${data.process.name}:${data.process.pm_id} - message`,
+                            `${data.process.name}:${data.process.pm_id} - ${data.desc ? data.desc : "message"}`,
                             `
                             <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
+                            <p>Class: <b>${data.class ? data.class : "--"}</b></p>
+                            <p>Description: <b>${data.desc ? data.desc : "--"}</b></p>
                             <pre>${JSON.stringify(data.data, undefined, 4)}</pre>`);
                     });
             });

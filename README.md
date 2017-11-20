@@ -52,6 +52,8 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 `messages` - if `true` apps custom messages will be monitored (optional). See [Custom messages](#custom-messages)
 
+`classes` - list of message classes to monitor (optional). See [Custom messages](#custom-messages)
+
 `probes` - object describing PMX metrics to be monitored (optional). See [Metrics monitoring](#metrics-monitoring)
 
 `probeIntervalM` - how often PMX metrics will be tested in minutes (optional). If not set, 1 minute is used
@@ -96,11 +98,21 @@ To send message from your app use:
 ```javascript
 process.send({
     type : "process:msg",    
+    class: "new user",
+    desc: "user " + name + " created",
     data : {
         ...
     }
 });
 ```
+
+`type` - must be `process:msg`
+
+`class` - class of message (optional). Classes can be used to filter messages to monitor.
+
+`desc` - some description (optional). If exist it will be used as mail subject.
+
+`data` - object containing additional data (optional)
 
 > Lean more here: http://pm2.keymetrics.io/docs/usage/pm2-api/#send-message-to-process
 
