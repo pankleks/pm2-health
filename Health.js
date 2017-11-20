@@ -52,9 +52,9 @@ class Health {
                     bus.on("process:msg", (data) => {
                         if (!data.data)
                             data.data = {};
-                        if (data.data.class && Array.isArray(this._config.classes) && this._config.classes.indexOf(data.data.class) === -1)
+                        if (data.data._class$ && Array.isArray(this._config.classes) && this._config.classes.indexOf(data.data._class$) === -1)
                             return;
-                        this.mail(`${data.process.name}:${data.process.pm_id} - ${data.data.desc ? data.data.desc : "message"}`, `
+                        this.mail(`${data.process.name}:${data.process.pm_id} - ${data.data._desc$ ? data.data._desc$ : "message"}`, `
                             <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
                             <pre>${JSON.stringify(data.data, undefined, 4)}</pre>`);
                     });
