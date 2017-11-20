@@ -25,14 +25,7 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
     "replyTo": "",
     "events": ["exit"],
     "probes": {
-        "execution / min": {
-            "target": 0.5,
-            "op": "<="
-        },
-        "failed execution count": {
-            "target": 0,
-            "op": ">"
-        }
+        ...
     },
     "probeIntervalM": 1,
     "addLogs": true
@@ -75,6 +68,9 @@ To configure rules of alerting, setup `probes` section in module config file.
         "op": ">",
         "ifChanged": true,
         "disabled": false
+    },
+    "metric 2": {
+        ...
     }    
 }
 ```
