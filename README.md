@@ -93,10 +93,10 @@ On top of standard PM2 events, you can send custom messages from your apps.
 To send message from your app use:
 ```javascript
 process.send({
-    type : "process:msg",    
+    type: "process:msg",    
     class: "new user",
     desc: "user " + name + " created",
-    data : {
+    data: {
         ...
     }
 });
