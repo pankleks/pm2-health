@@ -94,9 +94,9 @@ To send message from your app use:
 ```javascript
 process.send({
     type: "process:msg",    
-    class: "new user",
-    desc: "user " + name + " created",
     data: {
+        _class$: "new user",
+        _desc$: "user " + name + " created",        
         ...
     }
 });
@@ -104,11 +104,12 @@ process.send({
 
 * `type` - must be `process:msg`
 
-* `class` - class of message (optional). Classes can be used to filter messages to monitor.
+* `data` - object containing additional data (optional). On top of message data, you can add following fields which `pm2-health` uses to:
 
-* `desc` - some description (optional). If exist it will be used as mail subject.
+    * `_class$` - class of message (optional). Used to filter messages to monitor.
 
-* `data` - object containing additional data (optional)
+    * `_desc$` - some description (optional). Used as mail subject.
+
 
 > Lean more here: http://pm2.keymetrics.io/docs/usage/pm2-api/#send-message-to-process
 
