@@ -55,7 +55,7 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 * `appsExcluded` - list of app names to exclude from monitoring (optional)
 
-> if any of required parameters is not defined, `pm2-health` will shutdown. You can check error logs for details.
+> If any of required parameters is not defined, `pm2-health` will shutdown. You can check error logs for details.
 
 ## Metrics monitoring
 
