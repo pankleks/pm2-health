@@ -53,6 +53,8 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 * `addLogs` - if `true` app logs will be added as mail attachement (optional)
 
+* `appsExcluded` - list of app names to exclude from monitoring (optional)
+
 > if any of required parameters is not defined, `pm2-health` will shutdown. You can check error logs for details.
 
 ## Metrics monitoring

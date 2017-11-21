@@ -24,6 +24,9 @@ class Health {
         if (this._config.probeIntervalM == null)
             this._config.probeIntervalM = PROBE_INTERVAL_M;
     }
+    isAppExcluded(app) {
+        return app === "pm2-health" || (Array.isArray(this._config.appsExcluded) && this._config.appsExcluded.indexOf(app) !== -1);
+    }
     go() {
         console.log(`pm2-health is on`);
         PM2.connect((ex) => {
@@ -31,7 +34,7 @@ class Health {
             PM2.launchBus((ex, bus) => {
                 stopIfEx(ex);
                 bus.on("process:event", (data) => {
-                    if (data.manually)
+                    if (data.manually || this.isAppExcluded(data.process.name))
                         return;
                     if (Array.isArray(this._config.events) && this._config.events.indexOf(data.event) === -1)
                         return;
@@ -42,14 +45,16 @@ class Health {
                 });
                 if (this._config.exceptions)
                     bus.on("process:exception", (data) => {
-                        if (data.process.name !== "pm2-health") {
-                            this.mail(`${data.process.name}:${data.process.pm_id} - exception`, `
-                                <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>                            
-                                <pre>${JSON.stringify(data.data, undefined, 4)}</pre>`);
-                        }
+                        if (this.isAppExcluded(data.process.name))
+                            return;
+                        this.mail(`${data.process.name}:${data.process.pm_id} - exception`, `
+                            <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>                            
+                            <pre>${JSON.stringify(data.data, undefined, 4)}</pre>`);
                     });
                 if (this._config.messages)
                     bus.on("process:msg", (data) => {
+                        if (this.isAppExcluded(data.process.name))
+                            return;
                         if (!data.data)
                             data.data = {};
                         if (data.data._class$ && Array.isArray(this._config.classes) && this._config.classes.indexOf(data.data._class$) === -1)
@@ -103,6 +108,8 @@ class Health {
         PM2.list((ex, list) => {
             stopIfEx(ex);
             for (let e of list) {
+                if (this.isAppExcluded(e.name))
+                    continue;
                 let monit = e.pm2_env["axm_monitor"];
                 if (!monit)
                     continue;
