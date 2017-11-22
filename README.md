@@ -46,7 +46,7 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 * `messages` - if `true` apps custom messages will be monitored (optional). See [Custom messages](#custom-messages)
 
-* `messageExcludeExp` - regular expression used to exclude messages (optional). See [Filtering custom messages](#filtering-custom-messages)
+* `messageExcludeExps` - list of regular expressions used to exclude messages (optional). See [Filtering custom messages](#filtering-custom-messages)
 
 * `probes` - object describing PMX metrics to be monitored (optional). See [Metrics monitoring](#metrics-monitoring)
 
@@ -108,9 +108,9 @@ process.send({
 ### Filtering custom messages
 You can exclude some of the messages based on their `data` content:
 
-1. Set config property `messageExcludeExp` to regular expression
-1. `data` (converted to JSON string) will be tested with this expression
-1. If test is positive, message will be excluded
+1. Add regular expression to list in `messageExcludeExp` config property
+1. `data` (converted to JSON string) will be tested with this all expressions in the list
+1. If any test is positive, message will be excluded
 
 Example:
 
@@ -122,10 +122,13 @@ function slow(operation, duration) {
 ```
 You know that `backup` and `restore` operations are always slow and wish to exclude them, but still get other slow operations.
 
-Set `messageExcludeExp` to: 
+Set config to:
+```json
+"messageExcludeExps": [
+    "\"operation\": \"(backup|restore)\""
+]
 ```
-"operation": "(backup|restore)"
-```
+> `"` chars needs to be escaped with `\"`
 
 ## Hold notifications temporarily
 

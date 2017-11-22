@@ -29,9 +29,9 @@ class Health {
     }
     go() {
         console.log(`pm2-health is on`);
-        let messageExcludeExp = null;
-        if (this._config.messageExcludeExp)
-            messageExcludeExp = new RegExp(this._config.messageExcludeExp);
+        let exps = [];
+        if (Array.isArray(this._config.messageExcludeExps))
+            exps = this._config.messageExcludeExps.map(e => new RegExp(e));
         PM2.connect((ex) => {
             stopIfEx(ex);
             PM2.launchBus((ex, bus) => {
@@ -59,7 +59,7 @@ class Health {
                         if (this.isAppExcluded(data.process.name))
                             return;
                         let json = JSON.stringify(data.data, undefined, 4);
-                        if (messageExcludeExp && messageExcludeExp.test(json))
+                        if (exps.some(e => e.test(json)))
                             return; // exclude
                         this.mail(`${data.process.name}:${data.process.pm_id} - message`, `
                             <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>

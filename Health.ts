@@ -29,7 +29,7 @@ interface IConfig extends ISmtp {
     addLogs: boolean;
     exceptions: boolean;
     messages: boolean;
-    messageExcludeExp: string;
+    messageExcludeExps: string;
     appsExcluded: string[];
 }
 
@@ -56,9 +56,9 @@ export class Health {
         console.log(`pm2-health is on`);
 
         let
-            messageExcludeExp: RegExp = null;
-        if (this._config.messageExcludeExp)
-            messageExcludeExp = new RegExp(this._config.messageExcludeExp);
+            exps: RegExp[] = [];
+        if (Array.isArray(this._config.messageExcludeExps))
+            exps = this._config.messageExcludeExps.map(e => new RegExp(e));
 
         PM2.connect((ex) => {
             stopIfEx(ex);
@@ -102,7 +102,7 @@ export class Health {
                         let
                             json = JSON.stringify(data.data, undefined, 4);
 
-                        if (messageExcludeExp && messageExcludeExp.test(json))
+                        if (exps.some(e => e.test(json)))
                             return; // exclude
 
                         this.mail(
