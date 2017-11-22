@@ -109,8 +109,8 @@ process.send({
 You can exclude some of the messages based on their `data` content:
 
 1. Set config property `messageExcludeExp` to regular expression
-1. `data` as JSON string will be tested with this expression
-1. If test is `true`, message will be excluded
+1. `data` (converted to JSON string) will be tested with this expression
+1. If test is positive, message will be excluded
 
 Example:
 
