@@ -89,7 +89,7 @@ To configure rules of alerting, setup `probes` section in module config file.
 
 ## Custom messages
 
-On top of standard PM2 events, you can send custom messages.
+On top of standard PM2 events, you can monitor custom messages sent from your apps.
 
 To send message from your app use:
 ```javascript
