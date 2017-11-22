@@ -5,6 +5,8 @@ This [PM2](http://pm2.keymetrics.io/) module is:
 * Monitoring PMX metrics of your apps and send alerts when value hits treshold
 * Sending mail notifications
 
+With rich config options you can fine-tune monitoring rules.
+
 ## Installation
 
 `pm2 install pm2-health`
@@ -12,6 +14,8 @@ This [PM2](http://pm2.keymetrics.io/) module is:
 ## Configuration
 
 After installation run `pm2 conf` to configure module. Alternatively edit `module_conf.json` file directly (in PM2 home folder).
+
+### Minimum required config:
 
 ```json
 "pm2-health": {
@@ -21,16 +25,13 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
         "user": "your-smtp-user",
         "password": "your-smtp-password"
     },
-    "mailTo": "mail1,mail2",
-    "replyTo": "",
-    "events": ["exit"],
-    "probes": {
-        ...
-    },
-    "probeIntervalM": 1,
-    "addLogs": true
+    "mailTo": "mail1,mail2"
 }
 ```
+> If any of required properties is not defined, `pm2-health` will shutdown. You can check error logs for details.
+
+### All config options:
+
 * `smtp` - SMTP server configuration. If your SMTP doesn't require auth, leave `smtp.user` empty
 
 * `mailTo` - comma separated list of notification receipients
@@ -45,7 +46,7 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 * `messages` - if `true` apps custom messages will be monitored (optional). See [Custom messages](#custom-messages)
 
-* `classes` - list of message classes to monitor (optional). See [Custom messages](#custom-messages)
+* `messageExcludeExp` - regular expression used to exclude messages (optional). See [Filtering custom messages](#filtering-custom-messages)
 
 * `probes` - object describing PMX metrics to be monitored (optional). See [Metrics monitoring](#metrics-monitoring)
 
@@ -54,8 +55,6 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 * `addLogs` - if `true` app logs will be added as mail attachement (optional)
 
 * `appsExcluded` - list of app names to exclude from monitoring (optional)
-
-> If any of required parameters is not defined, `pm2-health` will shutdown. You can check error logs for details.
 
 ## Metrics monitoring
 
@@ -90,15 +89,13 @@ To configure rules of alerting, setup `probes` section in module config file.
 
 ## Custom messages
 
-On top of standard PM2 events, you can send custom messages from your apps.
+On top of standard PM2 events, you can send custom messages.
 
 To send message from your app use:
 ```javascript
 process.send({
     type: "process:msg",    
-    data: {
-        _class$: "new user",
-        _desc$: "user " + name + " created",        
+    data: {    
         ...
     }
 });
@@ -106,14 +103,29 @@ process.send({
 
 * `type` - must be `process:msg`
 
-* `data` - object containing additional data (optional). On top of message data, you can add following fields which `pm2-health` uses to:
+* `data` - object containing additional data (optional).
 
-    * `_class$` - class of message (optional). Used to filter messages to monitor.
+### Filtering custom messages
+You can exclude some of the messages based on their `data` content:
 
-    * `_desc$` - some description (optional). Used as mail subject.
+1. Set config property `messageExcludeExp` to regular expression
+1. `data` as JSON string will be tested with this expression
+1. If test is `true`, message will be excluded
 
+Example:
 
-> Lean more here: http://pm2.keymetrics.io/docs/usage/pm2-api/#send-message-to-process
+You wish to monitor slow operations in your app, so you send custom messages like so:
+```javascript
+function slow(operation, duration) {
+    process.send({ type: "process:msg", data: { operation, duration }});
+}
+```
+You know that `backup` and `restore` operations are always slow and wish to exclude them, but still get other slow operations.
+
+Set `messageExcludeExp` to: 
+```
+operation: "(backup|restore)"
+```
 
 ## Hold notifications temporarily
 

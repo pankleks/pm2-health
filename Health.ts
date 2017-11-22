@@ -1,6 +1,6 @@
 import * as PM2 from "pm2";
 import * as Pmx from "pmx";
-import { basename } from "path";
+import { basename, join } from "path";
 import { Mail, ISmtp } from "./Mail";
 
 const PROBE_INTERVAL_M = 1;
@@ -29,7 +29,7 @@ interface IConfig extends ISmtp {
     addLogs: boolean;
     exceptions: boolean;
     messages: boolean;
-    classes: string[];
+    messageExcludeExp: string;
     appsExcluded: string[];
 }
 
@@ -45,7 +45,7 @@ export class Health {
         this._mail = new Mail(_config);
 
         if (this._config.probeIntervalM == null)
-            this._config.probeIntervalM = PROBE_INTERVAL_M;
+            this._config.probeIntervalM = PROBE_INTERVAL_M;            
     }
 
     isAppExcluded(app: string) {
@@ -54,6 +54,11 @@ export class Health {
 
     go() {
         console.log(`pm2-health is on`);
+
+        let
+            messageExcludeExp: RegExp = null;
+        if (this._config.messageExcludeExp)
+            messageExcludeExp = new RegExp(this._config.messageExcludeExp);
 
         PM2.connect((ex) => {
             stopIfEx(ex);
@@ -94,17 +99,17 @@ export class Health {
                         if (this.isAppExcluded(data.process.name))
                             return;
 
-                        if (!data.data)
-                            data.data = {};
+                        let
+                            json = JSON.stringify(data.data, undefined, 4);
 
-                        if (data.data._class$ && Array.isArray(this._config.classes) && this._config.classes.indexOf(data.data._class$) === -1)
-                            return;
+                        if (messageExcludeExp && messageExcludeExp.test(json))
+                            return; // exclude
 
                         this.mail(
-                            `${data.process.name}:${data.process.pm_id} - ${data.data._desc$ ? data.data._desc$ : "message"}`,
+                            `${data.process.name}:${data.process.pm_id} - message`,
                             `
                             <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
-                            <pre>${JSON.stringify(data.data, undefined, 4)}</pre>`);
+                            <pre>${json}</pre>`);
                     });
             });
 
