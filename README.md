@@ -124,7 +124,7 @@ You know that `backup` and `restore` operations are always slow and wish to excl
 
 Set `messageExcludeExp` to: 
 ```
-operation: "(backup|restore)"
+"operation": "(backup|restore)"
 ```
 
 ## Hold notifications temporarily
