@@ -128,7 +128,7 @@ Set config to:
     "\"operation\": \"(backup|restore)\""
 ]
 ```
-> `"` chars needs to be escaped with `\"`
+> Remember to escape regex string to JSON string
 
 ## Hold notifications temporarily
 
