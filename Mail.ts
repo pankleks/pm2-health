@@ -2,7 +2,7 @@ import * as Mailer from "nodemailer";
 import * as Fs from "fs";
 import { hostname } from "os";
 
-export interface ISmtp {
+export interface ISmtpConfig {
     smtp: {
         host: string;
         port: number;
@@ -16,7 +16,7 @@ export interface ISmtp {
 export class Mail {
     private _template = "<p><!-- body --></p><p><!-- timeStamp --></p>";
 
-    constructor(private _config: ISmtp) {
+    constructor(private _config: ISmtpConfig) {
         if (!this._config.smtp)
             throw new Error(`[smtp] not set`);
         if (!this._config.smtp.host)

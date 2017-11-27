@@ -4,5 +4,6 @@
         ".vscode": true,
         "*.js.map": true,
         "package-lock.json": true
-    }
+    },
+    "editor.formatOnSave": true
 }

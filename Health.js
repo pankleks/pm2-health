@@ -4,10 +4,8 @@ const PM2 = require("pm2");
 const Pmx = require("pmx");
 const path_1 = require("path");
 const Mail_1 = require("./Mail");
-const PROBE_INTERVAL_M = 1;
-const HOLD_PERIOD_M = 30;
-const LOGS = ["pm_err_log_path", "pm_out_log_path"];
-const OP = {
+const History_1 = require("./History");
+const PROBE_INTERVAL_M = 1, HOLD_PERIOD_M = 30, LOGS = ["pm_err_log_path", "pm_out_log_path"], OP = {
     "<": (a, b) => a < b,
     ">": (a, b) => a > b,
     "=": (a, b) => a === b,
@@ -19,10 +17,10 @@ class Health {
     constructor(_config) {
         this._config = _config;
         this._holdTill = null;
-        this._history = {};
-        this._mail = new Mail_1.Mail(_config);
         if (this._config.probeIntervalM == null)
             this._config.probeIntervalM = PROBE_INTERVAL_M;
+        this._mail = new Mail_1.Mail(_config);
+        this._history = new History_1.History(this._config);
     }
     isAppExcluded(app) {
         return app === "pm2-health" || (Array.isArray(this._config.appsExcluded) && this._config.appsExcluded.indexOf(app) !== -1);
@@ -86,6 +84,10 @@ class Health {
                 reply(`mail failed: ${ex.message || ex}`);
             }
         });
+        Pmx.action("dump", (reply) => {
+            this._history.dump();
+            reply(`dumping`);
+        });
     }
     async mail(subject, body, attachements = []) {
         let t = new Date();
@@ -99,12 +101,6 @@ class Health {
             console.error(`mail failed: ${ex.message || ex}`);
         }
     }
-    historyAdd(pid, key, value) {
-        this._history[pid + key] = value;
-    }
-    historyLast(pid, key) {
-        return this._history[pid + key];
-    }
     testProbes() {
         let alerts = [];
         PM2.list((ex, list) => {
@@ -117,25 +113,23 @@ class Health {
                     continue;
                 for (let key of Object.keys(monit)) {
                     let probe = this._config.probes[key];
-                    if (!probe || probe.disabled === true || isNaN(probe.target))
+                    if (!probe)
                         continue;
-                    let v = parseFloat(monit[key].value);
-                    if (isNaN(v))
-                        continue;
-                    let fn = OP[probe.op];
-                    if (!fn)
-                        continue;
-                    if (fn(v, probe.target) === true && (probe.ifChanged !== true || this.historyLast(e.pid, key) !== v)) {
-                        this.historyAdd(e.pid, key, v);
-                        alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${probe.target}</td></tr>`);
+                    let temp = parseFloat(monit[key].value), v = isNaN(temp) ? monit[key].value : temp;
+                    // test
+                    if (!probe.disabled && !isNaN(probe.target) && !isNaN(v)) {
+                        let fn = OP[probe.op];
+                        if (fn && fn(v, probe.target) === true && (probe.ifChanged !== true || this._history.last(e.pid, key) !== v))
+                            alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${this._history.last(e.pid, key)}</td><td>${probe.target}</td></tr>`);
                     }
+                    this._history.push(e.pid, key, v);
                 }
             }
             if (alerts.length > 0)
                 this.mail(`${alerts.length} alert(s)`, `
                     <table>
                         <tr>
-                            <th>App</th><th>Metric</th><th>Value</th><th>Target</th>
+                            <th>App</th><th>Metric</th><th>Value</th><th>Prev. Value</th><th>Target</th>
                         </tr>
                         ${alerts.join("")}
                     </table>`);

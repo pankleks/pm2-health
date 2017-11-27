@@ -1,21 +1,23 @@
 import * as PM2 from "pm2";
 import * as Pmx from "pmx";
 import { basename, join } from "path";
-import { Mail, ISmtp } from "./Mail";
+import { Mail, ISmtpConfig } from "./Mail";
+import { History, IHistoryConfig } from "./History";
 
-const PROBE_INTERVAL_M = 1;
-const HOLD_PERIOD_M = 30;
-const LOGS = ["pm_err_log_path", "pm_out_log_path"];
-const OP = {
-    "<": (a, b) => a < b,
-    ">": (a, b) => a > b,
-    "=": (a, b) => a === b,
-    "<=": (a, b) => a <= b,
-    ">=": (a, b) => a >= b,
-    "!=": (a, b) => a != b
-}
+const
+    PROBE_INTERVAL_M = 1,
+    HOLD_PERIOD_M = 30,
+    LOGS = ["pm_err_log_path", "pm_out_log_path"],
+    OP = {
+        "<": (a, b) => a < b,
+        ">": (a, b) => a > b,
+        "=": (a, b) => a === b,
+        "<=": (a, b) => a <= b,
+        ">=": (a, b) => a >= b,
+        "!=": (a, b) => a != b
+    }
 
-interface IConfig extends ISmtp {
+interface IConfig extends ISmtpConfig, IHistoryConfig {
     events: string[];
     probes: {
         [key: string]: {
@@ -36,16 +38,14 @@ interface IConfig extends ISmtp {
 export class Health {
     readonly _mail: Mail;
     _holdTill: Date = null;
-
-    _history: {
-        [pid: number]: number
-    } = {};
+    _history: History;
 
     constructor(private _config: IConfig) {
-        this._mail = new Mail(_config);
-
         if (this._config.probeIntervalM == null)
-            this._config.probeIntervalM = PROBE_INTERVAL_M;            
+            this._config.probeIntervalM = PROBE_INTERVAL_M;
+
+        this._mail = new Mail(_config);
+        this._history = new History(this._config);
     }
 
     isAppExcluded(app: string) {
@@ -136,6 +136,11 @@ export class Health {
                 reply(`mail failed: ${ex.message || ex}`);
             }
         });
+
+        Pmx.action("dump", (reply) => {
+            this._history.dump();
+            reply(`dumping`);
+        });
     }
 
     private async mail(subject: string, body: string, attachements = []) {
@@ -151,14 +156,6 @@ export class Health {
         catch (ex) {
             console.error(`mail failed: ${ex.message || ex}`);
         }
-    }
-
-    historyAdd(pid: number, key: string, value: any) {
-        this._history[pid + key] = value;
-    }
-
-    historyLast(pid: number, key: string) {
-        return this._history[pid + key];
     }
 
     private testProbes() {
@@ -180,23 +177,23 @@ export class Health {
                 for (let key of Object.keys(monit)) {
                     let
                         probe = this._config.probes[key];
-                    if (!probe || probe.disabled === true || isNaN(probe.target))
+                    if (!probe)
                         continue;
 
                     let
-                        v = parseFloat(monit[key].value);
-                    if (isNaN(v))
-                        continue;
+                        temp = parseFloat(monit[key].value),
+                        v = isNaN(temp) ? monit[key].value : temp;
 
-                    let
-                        fn = OP[probe.op];
-                    if (!fn)
-                        continue;
+                    // test
+                    if (!probe.disabled && !isNaN(probe.target) && !isNaN(v)) {
+                        let
+                            fn = OP[probe.op];
 
-                    if (fn(v, probe.target) === true && (probe.ifChanged !== true || this.historyLast(e.pid, key) !== v)) {
-                        this.historyAdd(e.pid, key, v);
-                        alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${probe.target}</td></tr>`);
+                        if (fn && fn(v, probe.target) === true && (probe.ifChanged !== true || this._history.last(e.pid, key) !== v))
+                            alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${this._history.last(e.pid, key)}</td><td>${probe.target}</td></tr>`);
                     }
+
+                    this._history.push(e.pid, key, v);
                 }
             }
 
@@ -206,7 +203,7 @@ export class Health {
                     `
                     <table>
                         <tr>
-                            <th>App</th><th>Metric</th><th>Value</th><th>Target</th>
+                            <th>App</th><th>Metric</th><th>Value</th><th>Prev. Value</th><th>Target</th>
                         </tr>
                         ${alerts.join("")}
                     </table>`);
