@@ -1,6 +1,6 @@
 {
   "name": "pm2-health",
-  "version": "1.4.5",
+  "version": "1.4.9",
   "description": "Apps health monitor and mail notification module for pm2",
   "main": "App.js",
   "scripts": {
@@ -10,7 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "nodemailer": "^4.4.0",
-    "pm2": "^2.7.2"
+    "pm2": "^2.8.0"
   },
   "devDependencies": {
     "@types/node": "^8.0.52",

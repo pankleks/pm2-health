@@ -10,13 +10,13 @@ class History {
             host: os_1.hostname(),
             history: {}
         };
-        if (this._config.history)
+        if (!this._config.history)
             this._config.history = {
                 intervalS: 600,
                 maxSamples: 1,
                 disabled: true
             };
-        if (this._config.history.url && !this._config.history.disabled)
+        if (this._config.history.url && this._config.history.disabled !== true)
             this.send();
     }
     push(pid, app, key, value) {
@@ -36,6 +36,7 @@ class History {
         return h[h.length - 1];
     }
     dump() {
+        this._data.timeStamp = new Date().getTime();
         Fs.writeFile(`History_${new Date().toISOString()}.json`, JSON.stringify(this._data), (ex) => {
             if (ex)
                 console.error(`Can't dump history, ${ex.message || ex}`);

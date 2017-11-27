@@ -185,7 +185,7 @@ export class Health {
                         v = isNaN(temp) ? monit[key].value : temp;
 
                     // test
-                    if (!probe.disabled && !isNaN(probe.target) && !isNaN(v)) {
+                    if (probe.disabled !== true && !isNaN(probe.target) && !isNaN(v)) {
                         let
                             fn = OP[probe.op];
 

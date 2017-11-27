@@ -31,14 +31,14 @@ export class History {
     };
 
     constructor(private _config: IHistoryConfig) {
-        if (this._config.history)
+        if (!this._config.history)
             this._config.history = {
                 intervalS: 600,
                 maxSamples: 1,
                 disabled: true
             };
 
-        if (this._config.history.url && !this._config.history.disabled)
+        if (this._config.history.url && this._config.history.disabled !== true)
             this.send();
     }
 
@@ -66,6 +66,7 @@ export class History {
     }
 
     dump() {
+        this._data.timeStamp = new Date().getTime();
         Fs.writeFile(`History_${new Date().toISOString()}.json`, JSON.stringify(this._data), (ex) => {
             if (ex)
                 console.error(`Can't dump history, ${ex.message || ex}`);

@@ -117,7 +117,7 @@ class Health {
                         continue;
                     let temp = parseFloat(monit[key].value), v = isNaN(temp) ? monit[key].value : temp;
                     // test
-                    if (!probe.disabled && !isNaN(probe.target) && !isNaN(v)) {
+                    if (probe.disabled !== true && !isNaN(probe.target) && !isNaN(v)) {
                         let fn = OP[probe.op];
                         if (fn && fn(v, probe.target) === true && (probe.ifChanged !== true || this._history.last(e.pid, key) !== v))
                             alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${this._history.last(e.pid, key)}</td><td>${probe.target}</td></tr>`);
