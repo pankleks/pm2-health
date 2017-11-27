@@ -1,4 +1,5 @@
 import * as Fs from "fs";
+import { hostname } from "os";
 import { httpFetch } from "./Http";
 
 export interface IHistoryConfig {
@@ -10,12 +11,24 @@ export interface IHistoryConfig {
     }
 }
 
-export class History {
-    private _history: {
+interface IPayload {
+    host: string,
+    timeStamp?: number,
+    history: {
         [pid: number]: {
-            [key: string]: any[]
+            app: string;
+            metric: {
+                [key: string]: any[];
+            }
         }
-    } = {};
+    }
+}
+
+export class History {
+    private _data: IPayload = {
+        host: hostname(),
+        history: {}
+    };
 
     constructor(private _config: IHistoryConfig) {
         if (this._config.history)
@@ -29,14 +42,14 @@ export class History {
             this.send();
     }
 
-    push(pid: number, key: string, value: any) {
-        if (!this._history[pid])
-            this._history[pid] = {};
-        if (!this._history[pid][key])
-            this._history[pid][key] = [];
+    push(pid: number, app: string, key: string, value: any) {
+        if (!this._data.history[pid])
+            this._data.history[pid] = { app: app, metric: {} };
+        if (!this._data.history[pid].metric[key])
+            this._data.history[pid].metric[key] = [];
 
         let
-            h = this._history[pid][key];
+            h = this._data.history[pid].metric[key];
 
         h.push(value);
         if (h.length > this._config.history.maxSamples)
@@ -44,16 +57,16 @@ export class History {
     }
 
     last(pid: number, key: string) {
-        if (!this._history[pid] || !this._history[pid][key])
+        if (!this._data.history[pid] || !this._data.history[pid].metric[key])
             return undefined;
 
         let
-            h = this._history[pid][key];
+            h = this._data.history[pid].metric[key];
         return h[h.length - 1];
     }
 
     dump() {
-        Fs.writeFile(`History_${new Date().toISOString()}.json`, JSON.stringify(this._history), (ex) => {
+        Fs.writeFile(`History_${new Date().toISOString()}.json`, JSON.stringify(this._data), (ex) => {
             if (ex)
                 console.error(`Can't dump history, ${ex.message || ex}`);
         });
@@ -61,7 +74,8 @@ export class History {
 
     async send() {
         try {
-            await httpFetch(this._config.history.url, JSON.stringify(this._history));
+            this._data.timeStamp = new Date().getTime();
+            await httpFetch(this._config.history.url, JSON.stringify(this._data));
         }
         catch (ex) {
             console.error(`http push failed: ${ex.message || ex}`);

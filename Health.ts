@@ -193,7 +193,7 @@ export class Health {
                             alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${this._history.last(e.pid, key)}</td><td>${probe.target}</td></tr>`);
                     }
 
-                    this._history.push(e.pid, key, v);
+                    this._history.push(e.pid, e.name, key, v);
                 }
             }
 
