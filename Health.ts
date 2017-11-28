@@ -21,7 +21,7 @@ interface IConfig extends ISmtpConfig, IShapshotConfig {
     events: string[];
     probes: {
         [key: string]: {
-            target: number;
+            target: any;
             op: "<" | ">" | "=" | "<=" | ">=" | "!=";
             ifChanged: boolean;
             disabled: boolean;
@@ -185,16 +185,12 @@ export class Health {
                         v = isNaN(temp) ? monit[key].value : temp,
                         bad: boolean;
 
-                    // test
-                    if (probe.disabled !== true && !isNaN(probe.target) && !isNaN(v)) {
-                        let
-                            fn = OP[probe.op];
+                    if (probe.op && probe.op in OP && probe.target != null)
+                        bad = OP[probe.op](v, probe.target);
 
-                        if (fn && fn(v, probe.target) === true && (probe.ifChanged !== true || this._snapshot.last(e.pid, key) !== v)) {
-                            bad = true;
-                            alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${this._snapshot.last(e.pid, key)}</td><td>${probe.target}</td></tr>`);
-                        }
-                    }
+                    // test
+                    if (probe.disabled !== true && bad === true && (probe.ifChanged !== true || this._snapshot.last(e.pid, key) !== v))
+                        alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${this._snapshot.last(e.pid, key)}</td><td>${probe.target}</td></tr>`);
 
                     this._snapshot.push(e.pid, e.name, key, { v, bad });
                 }

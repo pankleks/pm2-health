@@ -2,7 +2,8 @@
     "files.exclude": {
         "node_modules": true,
         ".vscode": true,
-        "*.js.map": true,
+        "**/*.js": true,
+        "**/*.js.map": true,
         "package-lock.json": true
     },
     "editor.formatOnSave": true
