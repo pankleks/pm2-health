@@ -5,6 +5,7 @@ import { httpFetch } from "./Http";
 export interface IHistoryConfig {
     history: {
         url?: string;
+        token?: string;
         intervalS: number;
         maxSamples: number;
         disabled: boolean;
@@ -12,6 +13,7 @@ export interface IHistoryConfig {
 }
 
 interface IPayload {
+    token?: string;
     host: string,
     timeStamp?: number,
     history: {
@@ -38,8 +40,10 @@ export class History {
                 disabled: true
             };
 
-        if (this._config.history.url && this._config.history.disabled !== true)
+        if (this._config.history.url && this._config.history.token && this._config.history.disabled !== true) {
+            this._data.token = this._config.history.token;
             this.send();
+        }
     }
 
     push(pid: number, app: string, key: string, value: any) {

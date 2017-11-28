@@ -16,8 +16,10 @@ class History {
                 maxSamples: 1,
                 disabled: true
             };
-        if (this._config.history.url && this._config.history.disabled !== true)
+        if (this._config.history.url && this._config.history.token && this._config.history.disabled !== true) {
+            this._data.token = this._config.history.token;
             this.send();
+        }
     }
     push(pid, app, key, value) {
         if (!this._data.history[pid])
