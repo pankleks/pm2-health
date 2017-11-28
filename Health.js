@@ -4,7 +4,7 @@ const PM2 = require("pm2");
 const Pmx = require("pmx");
 const path_1 = require("path");
 const Mail_1 = require("./Mail");
-const History_1 = require("./History");
+const Snapshot_1 = require("./Snapshot");
 const PROBE_INTERVAL_M = 1, HOLD_PERIOD_M = 30, LOGS = ["pm_err_log_path", "pm_out_log_path"], OP = {
     "<": (a, b) => a < b,
     ">": (a, b) => a > b,
@@ -20,7 +20,7 @@ class Health {
         if (this._config.probeIntervalM == null)
             this._config.probeIntervalM = PROBE_INTERVAL_M;
         this._mail = new Mail_1.Mail(_config);
-        this._history = new History_1.History(this._config);
+        this._snapshot = new Snapshot_1.Snapshot(this._config);
     }
     isAppExcluded(app) {
         return app === "pm2-health" || (Array.isArray(this._config.appsExcluded) && this._config.appsExcluded.indexOf(app) !== -1);
@@ -85,7 +85,7 @@ class Health {
             }
         });
         Pmx.action("dump", (reply) => {
-            this._history.dump();
+            this._snapshot.dump();
             reply(`dumping`);
         });
     }
@@ -115,14 +115,16 @@ class Health {
                     let probe = this._config.probes[key];
                     if (!probe)
                         continue;
-                    let temp = parseFloat(monit[key].value), v = isNaN(temp) ? monit[key].value : temp;
+                    let temp = parseFloat(monit[key].value), v = isNaN(temp) ? monit[key].value : temp, bad;
                     // test
                     if (probe.disabled !== true && !isNaN(probe.target) && !isNaN(v)) {
                         let fn = OP[probe.op];
-                        if (fn && fn(v, probe.target) === true && (probe.ifChanged !== true || this._history.last(e.pid, key) !== v))
-                            alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${this._history.last(e.pid, key)}</td><td>${probe.target}</td></tr>`);
+                        if (fn && fn(v, probe.target) === true && (probe.ifChanged !== true || this._snapshot.last(e.pid, key) !== v)) {
+                            bad = true;
+                            alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${this._snapshot.last(e.pid, key)}</td><td>${probe.target}</td></tr>`);
+                        }
                     }
-                    this._history.push(e.pid, e.name, key, v);
+                    this._snapshot.push(e.pid, e.name, key, { v, bad });
                 }
             }
             if (alerts.length > 0)
