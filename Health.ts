@@ -24,6 +24,7 @@ interface IConfig extends ISmtpConfig, IShapshotConfig {
             target: any;
             op: "<" | ">" | "=" | "<=" | ">=" | "!=";
             ifChanged: boolean;
+            noHistory: boolean;
             disabled: boolean;
         }
     }
@@ -197,7 +198,7 @@ export class Health {
                     if (bad)    // safe space by not storing false
                         data.bad = true;
 
-                    this._snapshot.push(e.pm_id, e.name, key, data);
+                    this._snapshot.push(e.pm_id, e.name, key, !probe.noHistory, data);
                 }
             }
 

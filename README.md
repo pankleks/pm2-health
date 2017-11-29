@@ -68,7 +68,8 @@ To configure rules of alerting, setup `probes` section in module config file.
         "target": 0,
         "op": ">",
         "ifChanged": true,
-        "disabled": false
+        "disabled": false,
+        "noHistory": true
     },
     "metric 2": {
         ...
@@ -84,6 +85,8 @@ To configure rules of alerting, setup `probes` section in module config file.
 * `ifChanged` - if `true`, alert will trigger only if current metric value is different from last recorded value (optional)
 
 * `disabled` - if `true`, metric won't be tested (optional)
+
+* `noHistory` if `true`, metric value history won't be stored (optional)
 
 > Learn how to define PMX probes in your apps here: http://pm2.keymetrics.io/docs/usage/process-metrics/
 

@@ -23,7 +23,10 @@ export interface IPayload {
         [appId: number]: {
             name: string;
             metric: {
-                [key: string]: IValue;
+                [key: string]: {
+                    history: boolean;
+                    v: IValue;
+                };
             }
         }
     }
@@ -42,18 +45,18 @@ export class Snapshot {
         this._data.token = this._config.snapshot.token;
     }
 
-    push(appId: number, app: string, key: string, v: IValue) {
+    push(appId: number, app: string, key: string, history: boolean, v: IValue) {
         if (!this._data.app[appId])
             this._data.app[appId] = { name: app, metric: {} };
 
-        this._data.app[appId].metric[key] = v;
+        this._data.app[appId].metric[key] = { history, v };
     }
 
     last(appId: number, key: string) {
         if (!this._data.app[appId] || !this._data.app[appId].metric[key])
             return undefined;
 
-        return this._data.app[appId].metric[key].v;
+        return this._data.app[appId].metric[key].v.v;
     }
 
     dump() {

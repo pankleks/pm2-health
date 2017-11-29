@@ -124,7 +124,7 @@ class Health {
                     let data = { v };
                     if (bad)
                         data.bad = true;
-                    this._snapshot.push(e.pm_id, e.name, key, data);
+                    this._snapshot.push(e.pm_id, e.name, key, !probe.noHistory, data);
                 }
             }
             this._snapshot.send();

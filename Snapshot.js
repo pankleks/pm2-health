@@ -14,15 +14,15 @@ class Snapshot {
             this._config.snapshot = {};
         this._data.token = this._config.snapshot.token;
     }
-    push(appId, app, key, v) {
+    push(appId, app, key, history, v) {
         if (!this._data.app[appId])
             this._data.app[appId] = { name: app, metric: {} };
-        this._data.app[appId].metric[key] = v;
+        this._data.app[appId].metric[key] = { history, v };
     }
     last(appId, key) {
         if (!this._data.app[appId] || !this._data.app[appId].metric[key])
             return undefined;
-        return this._data.app[appId].metric[key].v;
+        return this._data.app[appId].metric[key].v.v;
     }
     dump() {
         this._data.timeStamp = new Date().getTime();
