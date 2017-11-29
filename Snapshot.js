@@ -11,24 +11,18 @@ class Snapshot {
             snapshot: {}
         };
         if (!this._config.snapshot)
-            this._config.snapshot = {
-                intervalS: 600,
-                disabled: true
-            };
-        if (this._config.snapshot.url && this._config.snapshot.token && this._config.snapshot.disabled !== true) {
-            this._data.token = this._config.snapshot.token;
-            this.send();
-        }
+            this._config.snapshot = {};
+        this._data.token = this._config.snapshot.token;
     }
-    push(pid, app, key, v) {
-        if (!this._data.snapshot[pid])
-            this._data.snapshot[pid] = { app: app, metric: {} };
-        this._data.snapshot[pid].metric[key] = v;
+    push(id, app, key, v) {
+        if (!this._data.snapshot[id])
+            this._data.snapshot[id] = { app: app, metric: {} };
+        this._data.snapshot[id].metric[key] = v;
     }
-    last(pid, key) {
-        if (!this._data.snapshot[pid] || !this._data.snapshot[pid].metric[key])
+    last(id, key) {
+        if (!this._data.snapshot[id] || !this._data.snapshot[id].metric[key])
             return undefined;
-        return this._data.snapshot[pid].metric[key].v;
+        return this._data.snapshot[id].metric[key].v;
     }
     dump() {
         this._data.timeStamp = new Date().getTime();
@@ -38,17 +32,14 @@ class Snapshot {
         });
     }
     async send() {
+        if (!this._config.snapshot.url || !this._config.snapshot.token || this._config.snapshot.disabled === true)
+            return;
         try {
             this._data.timeStamp = new Date().getTime();
             await Http_1.httpFetch(this._config.snapshot.url, JSON.stringify(this._data));
         }
         catch (ex) {
             console.error(`http push failed: ${ex.message || ex}`);
-        }
-        finally {
-            setTimeout(() => {
-                this.send();
-            }, this._config.snapshot.intervalS * 1000);
         }
     }
 }

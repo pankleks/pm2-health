@@ -5,7 +5,7 @@ import { Mail, ISmtpConfig } from "./Mail";
 import { Snapshot, IShapshotConfig } from "./Snapshot";
 
 const
-    PROBE_INTERVAL_M = 1,
+    PROBE_INTERVAL_S = 60,
     HOLD_PERIOD_M = 30,
     LOGS = ["pm_err_log_path", "pm_out_log_path"],
     OP = {
@@ -27,7 +27,7 @@ interface IConfig extends ISmtpConfig, IShapshotConfig {
             disabled: boolean;
         }
     }
-    probeIntervalM: number;
+    probeIntervalS: number;
     addLogs: boolean;
     exceptions: boolean;
     messages: boolean;
@@ -37,12 +37,12 @@ interface IConfig extends ISmtpConfig, IShapshotConfig {
 
 export class Health {
     readonly _mail: Mail;
+    readonly _snapshot: Snapshot;
     _holdTill: Date = null;
-    _snapshot: Snapshot;
 
     constructor(private _config: IConfig) {
-        if (this._config.probeIntervalM == null)
-            this._config.probeIntervalM = PROBE_INTERVAL_M;
+        if (this._config.probeIntervalS == null)
+            this._config.probeIntervalS = PROBE_INTERVAL_S;
 
         this._mail = new Mail(_config);
         this._snapshot = new Snapshot(this._config);
@@ -189,12 +189,14 @@ export class Health {
                         bad = OP[probe.op](v, probe.target);
 
                     // test
-                    if (probe.disabled !== true && bad === true && (probe.ifChanged !== true || this._snapshot.last(e.pid, key) !== v))
-                        alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${this._snapshot.last(e.pid, key)}</td><td>${probe.target}</td></tr>`);
+                    if (probe.disabled !== true && bad === true && (probe.ifChanged !== true || this._snapshot.last(e.pm_id, key) !== v))
+                        alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${this._snapshot.last(e.pm_id, key)}</td><td>${probe.target}</td></tr>`);
 
-                    this._snapshot.push(e.pid, e.name, key, { v, bad });
+                    this._snapshot.push(e.pm_id, e.name, key, { v, bad });
                 }
             }
+
+            this._snapshot.send();
 
             if (alerts.length > 0)
                 this.mail(
@@ -209,7 +211,7 @@ export class Health {
 
             setTimeout(
                 () => { this.testProbes(); },
-                1000 * 60 * this._config.probeIntervalM);
+                1000 * this._config.probeIntervalS);
         });
     }
 }

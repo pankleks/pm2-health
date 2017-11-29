@@ -1,6 +1,6 @@
 {
   "name": "pm2-health",
-  "version": "1.4.13",
+  "version": "1.4.14",
   "description": "Apps health monitor and mail notification module for pm2",
   "main": "App.js",
   "scripts": {
@@ -47,13 +47,12 @@
     "messages": true,
     "messageExcludeExps": [],
     "probes": {},
-    "probeIntervalM": 1,
+    "probeIntervalS": 60,
     "addLogs": true,
     "appsExcluded": [],
     "snapshot": {
       "url": "",
       "token": "",
-      "intervalS": 600,
       "disabled": false
     }
   }

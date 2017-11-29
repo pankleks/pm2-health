@@ -6,8 +6,7 @@ export interface IShapshotConfig {
     snapshot: {
         url?: string;
         token?: string;
-        intervalS: number;
-        disabled: boolean;
+        disabled?: boolean;
     }
 }
 
@@ -21,7 +20,7 @@ interface IPayload {
     host: string,
     timeStamp?: number,
     snapshot: {
-        [pid: number]: {
+        [id: number]: {
             app: string;
             metric: {
                 [key: string]: IValue;
@@ -38,29 +37,23 @@ export class Snapshot {
 
     constructor(private _config: IShapshotConfig) {
         if (!this._config.snapshot)
-            this._config.snapshot = {
-                intervalS: 600,
-                disabled: true
-            };
+            this._config.snapshot = {};
 
-        if (this._config.snapshot.url && this._config.snapshot.token && this._config.snapshot.disabled !== true) {
-            this._data.token = this._config.snapshot.token;
-            this.send();
-        }
+        this._data.token = this._config.snapshot.token;
     }
 
-    push(pid: number, app: string, key: string, v: IValue) {
-        if (!this._data.snapshot[pid])
-            this._data.snapshot[pid] = { app: app, metric: {} };
+    push(id: number, app: string, key: string, v: IValue) {
+        if (!this._data.snapshot[id])
+            this._data.snapshot[id] = { app: app, metric: {} };
 
-        this._data.snapshot[pid].metric[key] = v;
+        this._data.snapshot[id].metric[key] = v;
     }
 
-    last(pid: number, key: string) {
-        if (!this._data.snapshot[pid] || !this._data.snapshot[pid].metric[key])
+    last(id: number, key: string) {
+        if (!this._data.snapshot[id] || !this._data.snapshot[id].metric[key])
             return undefined;
 
-        return this._data.snapshot[pid].metric[key].v;
+        return this._data.snapshot[id].metric[key].v;
     }
 
     dump() {
@@ -72,17 +65,15 @@ export class Snapshot {
     }
 
     async send() {
+        if (!this._config.snapshot.url || !this._config.snapshot.token || this._config.snapshot.disabled === true)
+            return;
+
         try {
             this._data.timeStamp = new Date().getTime();
             await httpFetch(this._config.snapshot.url, JSON.stringify(this._data));
         }
         catch (ex) {
             console.error(`http push failed: ${ex.message || ex}`);
-        }
-        finally {
-            setTimeout(() => {
-                this.send();
-            }, this._config.snapshot.intervalS * 1000);
         }
     }
 }
