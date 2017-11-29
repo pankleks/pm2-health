@@ -15,13 +15,13 @@ interface IValue {
     bad?: boolean;
 }
 
-interface IPayload {
+export interface IPayload {
     token?: string;
     host: string,
     timeStamp?: number,
-    snapshot: {
-        [id: number]: {
-            app: string;
+    app: {
+        [appId: number]: {
+            name: string;
             metric: {
                 [key: string]: IValue;
             }
@@ -32,7 +32,7 @@ interface IPayload {
 export class Snapshot {
     private _data: IPayload = {
         host: hostname(),
-        snapshot: {}
+        app: {}
     };
 
     constructor(private _config: IShapshotConfig) {
@@ -42,18 +42,18 @@ export class Snapshot {
         this._data.token = this._config.snapshot.token;
     }
 
-    push(id: number, app: string, key: string, v: IValue) {
-        if (!this._data.snapshot[id])
-            this._data.snapshot[id] = { app: app, metric: {} };
+    push(appId: number, app: string, key: string, v: IValue) {
+        if (!this._data.app[appId])
+            this._data.app[appId] = { name: app, metric: {} };
 
-        this._data.snapshot[id].metric[key] = v;
+        this._data.app[appId].metric[key] = v;
     }
 
-    last(id: number, key: string) {
-        if (!this._data.snapshot[id] || !this._data.snapshot[id].metric[key])
+    last(appId: number, key: string) {
+        if (!this._data.app[appId] || !this._data.app[appId].metric[key])
             return undefined;
 
-        return this._data.snapshot[id].metric[key].v;
+        return this._data.app[appId].metric[key].v;
     }
 
     dump() {

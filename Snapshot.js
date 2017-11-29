@@ -8,21 +8,21 @@ class Snapshot {
         this._config = _config;
         this._data = {
             host: os_1.hostname(),
-            snapshot: {}
+            app: {}
         };
         if (!this._config.snapshot)
             this._config.snapshot = {};
         this._data.token = this._config.snapshot.token;
     }
-    push(id, app, key, v) {
-        if (!this._data.snapshot[id])
-            this._data.snapshot[id] = { app: app, metric: {} };
-        this._data.snapshot[id].metric[key] = v;
+    push(appId, app, key, v) {
+        if (!this._data.app[appId])
+            this._data.app[appId] = { name: app, metric: {} };
+        this._data.app[appId].metric[key] = v;
     }
-    last(id, key) {
-        if (!this._data.snapshot[id] || !this._data.snapshot[id].metric[key])
+    last(appId, key) {
+        if (!this._data.app[appId] || !this._data.app[appId].metric[key])
             return undefined;
-        return this._data.snapshot[id].metric[key].v;
+        return this._data.app[appId].metric[key].v;
     }
     dump() {
         this._data.timeStamp = new Date().getTime();

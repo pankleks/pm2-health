@@ -121,7 +121,10 @@ class Health {
                     // test
                     if (probe.disabled !== true && bad === true && (probe.ifChanged !== true || this._snapshot.last(e.pm_id, key) !== v))
                         alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${this._snapshot.last(e.pm_id, key)}</td><td>${probe.target}</td></tr>`);
-                    this._snapshot.push(e.pm_id, e.name, key, { v, bad });
+                    let data = { v };
+                    if (bad)
+                        data.bad = true;
+                    this._snapshot.push(e.pm_id, e.name, key, data);
                 }
             }
             this._snapshot.send();
