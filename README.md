@@ -50,7 +50,7 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 * `probes` - object describing PMX metrics to be monitored (optional). See [Metrics monitoring](#metrics-monitoring)
 
-* `probeIntervalM` - how often PMX metrics will be tested in minutes (optional). If not set, 1 minute is used
+* `probeIntervalS` - how often PMX metrics will be tested in seconds (optional). If not set, 60 seconds is used
 
 * `addLogs` - if `true` app logs will be added as mail attachement (optional)
 
