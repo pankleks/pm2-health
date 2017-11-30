@@ -5,7 +5,7 @@ import { Mail, ISmtpConfig } from "./Mail";
 import { Snapshot, IShapshotConfig } from "./Snapshot";
 
 const
-    PROBE_INTERVAL_S = 60,
+    MERTIC_INTERVAL_S = 60,
     HOLD_PERIOD_M = 30,
     LOGS = ["pm_err_log_path", "pm_out_log_path"],
     OP = {
@@ -19,16 +19,17 @@ const
 
 interface IConfig extends ISmtpConfig, IShapshotConfig {
     events: string[];
-    probes: {
+    metric: {
         [key: string]: {
             target?: any;
             op?: "<" | ">" | "=" | "<=" | ">=" | "!=";
             ifChanged?: boolean;
             noHistory?: boolean;
-            disabled: boolean;
+            noNotify: boolean;
+            exclude?: boolean;
         }
     }
-    probeIntervalS: number;
+    metricIntervalS: number;
     addLogs: boolean;
     exceptions: boolean;
     messages: boolean;
@@ -42,8 +43,11 @@ export class Health {
     _holdTill: Date = null;
 
     constructor(private _config: IConfig) {
-        if (this._config.probeIntervalS == null)
-            this._config.probeIntervalS = PROBE_INTERVAL_S;
+        if (this._config.metricIntervalS == null)
+            this._config.metricIntervalS = MERTIC_INTERVAL_S;
+
+        if (!this._config.metric)
+            this._config.metric = {};
 
         this._mail = new Mail(_config);
         this._snapshot = new Snapshot(this._config);
@@ -173,13 +177,22 @@ export class Health {
                 let
                     monit = e.pm2_env["axm_monitor"];
                 if (!monit)
-                    continue;
+                    monit = {};
+
+                // add memory + cpu metrics
+                if (e.monit) {
+                    monit["memory"] = { value: e.monit.memory / 1048576 };
+                    monit["cpu"] = { value: e.monit.cpu };
+                }
 
                 for (let key of Object.keys(monit)) {
                     let
-                        probe = this._config.probes[key];
+                        probe = this._config.metric[key];
                     if (!probe)
-                        probe = { disabled: true };
+                        probe = { noNotify: true };
+
+                    if (probe.exclude === true)
+                        continue;
 
                     let
                         temp = parseFloat(monit[key].value),
@@ -190,7 +203,7 @@ export class Health {
                         bad = OP[probe.op](v, probe.target);
 
                     // test
-                    if (probe.disabled !== true && bad === true && (probe.ifChanged !== true || this._snapshot.last(e.pm_id, key) !== v))
+                    if (probe.noNotify !== true && bad === true && (probe.ifChanged !== true || this._snapshot.last(e.pm_id, key) !== v))
                         alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${this._snapshot.last(e.pm_id, key)}</td><td>${probe.target}</td></tr>`);
 
                     let
@@ -217,7 +230,7 @@ export class Health {
 
             setTimeout(
                 () => { this.testProbes(); },
-                1000 * this._config.probeIntervalS);
+                1000 * this._config.metricIntervalS);
         });
     }
 }

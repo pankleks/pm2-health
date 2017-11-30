@@ -5,7 +5,7 @@ const Pmx = require("pmx");
 const path_1 = require("path");
 const Mail_1 = require("./Mail");
 const Snapshot_1 = require("./Snapshot");
-const PROBE_INTERVAL_S = 60, HOLD_PERIOD_M = 30, LOGS = ["pm_err_log_path", "pm_out_log_path"], OP = {
+const MERTIC_INTERVAL_S = 60, HOLD_PERIOD_M = 30, LOGS = ["pm_err_log_path", "pm_out_log_path"], OP = {
     "<": (a, b) => a < b,
     ">": (a, b) => a > b,
     "=": (a, b) => a === b,
@@ -17,8 +17,10 @@ class Health {
     constructor(_config) {
         this._config = _config;
         this._holdTill = null;
-        if (this._config.probeIntervalS == null)
-            this._config.probeIntervalS = PROBE_INTERVAL_S;
+        if (this._config.metricIntervalS == null)
+            this._config.metricIntervalS = MERTIC_INTERVAL_S;
+        if (!this._config.metric)
+            this._config.metric = {};
         this._mail = new Mail_1.Mail(_config);
         this._snapshot = new Snapshot_1.Snapshot(this._config);
     }
@@ -110,16 +112,23 @@ class Health {
                     continue;
                 let monit = e.pm2_env["axm_monitor"];
                 if (!monit)
-                    continue;
+                    monit = {};
+                // add memory + cpu metrics
+                if (e.monit) {
+                    monit["memory"] = { value: e.monit.memory / 1048576 };
+                    monit["cpu"] = { value: e.monit.cpu };
+                }
                 for (let key of Object.keys(monit)) {
-                    let probe = this._config.probes[key];
+                    let probe = this._config.metric[key];
                     if (!probe)
-                        probe = { disabled: true };
+                        probe = { noNotify: true };
+                    if (probe.exclude === true)
+                        continue;
                     let temp = parseFloat(monit[key].value), v = isNaN(temp) ? monit[key].value : temp, bad;
                     if (probe.op && probe.op in OP && probe.target != null)
                         bad = OP[probe.op](v, probe.target);
                     // test
-                    if (probe.disabled !== true && bad === true && (probe.ifChanged !== true || this._snapshot.last(e.pm_id, key) !== v))
+                    if (probe.noNotify !== true && bad === true && (probe.ifChanged !== true || this._snapshot.last(e.pm_id, key) !== v))
                         alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${this._snapshot.last(e.pm_id, key)}</td><td>${probe.target}</td></tr>`);
                     let data = { v };
                     if (bad)
@@ -136,7 +145,7 @@ class Health {
                         </tr>
                         ${alerts.join("")}
                     </table>`);
-            setTimeout(() => { this.testProbes(); }, 1000 * this._config.probeIntervalS);
+            setTimeout(() => { this.testProbes(); }, 1000 * this._config.metricIntervalS);
         });
     }
 }

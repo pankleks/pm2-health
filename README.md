@@ -49,9 +49,9 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 * `messageExcludeExps` - list of regular expressions used to exclude messages (optional). See [Filtering custom messages](#filtering-custom-messages)
 
-* `probes` - object describing PMX metrics to be monitored (optional). See [Metrics monitoring](#metrics-monitoring)
+* `metric` - object describing PMX metrics to be monitored (optional). See [Metrics monitoring](#metrics-monitoring)
 
-* `probeIntervalS` - how often PMX metrics will be tested in seconds (optional). If not set, 60 seconds is used
+* `metricIntervalS` - how often PMX metrics will be tested in seconds (optional). If not set, 60 seconds is used
 
 * `addLogs` - if `true` app logs will be added as mail attachement (optional)
 
@@ -61,16 +61,17 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 `pm2-health` can monitor any PMX metrics defined in your apps.
 
-To configure rules of alerting, setup `probes` section in module config file.
+To configure rules of alerting, setup `metric` section in module config file.
 
 ```json
-"probes": {
+"metric": {
     "metric name": {
         "target": 0,
         "op": ">",
         "ifChanged": true,
-        "disabled": false,
-        "noHistory": true
+        "noNotify": true,
+        "noHistory": true,
+        "exclude": false
     },
     "metric 2": {
         ...
@@ -85,11 +86,15 @@ To configure rules of alerting, setup `probes` section in module config file.
 
 * `ifChanged` - if `true`, alert will trigger only if current metric value is different from last recorded value (optional)
 
-* `disabled` - if `true`, metric won't be tested (optional)
+* `noNotify` - if `true`, no alerts will be send (optional)
 
-* `noHistory` if `true`, metric value history won't be stored (optional)
+* `noHistory` - if `true`, metric value history won't be stored (optional)
 
-> Learn how to define PMX probes in your apps here: http://pm2.keymetrics.io/docs/usage/process-metrics/
+* `exclude` - if `true`, metric will be complettely excluded from monitoring (optional)
+
+By default, `cpu` and `memory` metrics are added.
+
+> Learn how to define PMX metrics in your apps here: http://pm2.keymetrics.io/docs/usage/process-metrics/
 
 ## Custom messages
 
