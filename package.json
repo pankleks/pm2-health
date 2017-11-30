@@ -1,6 +1,6 @@
 {
   "name": "pm2-health",
-  "version": "1.4.21",
+  "version": "1.4.24",
   "description": "Apps health monitor and mail notification module for pm2",
   "main": "App.js",
   "scripts": {

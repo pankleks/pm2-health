@@ -116,6 +116,11 @@ export class Health {
                             <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
                             <pre>${json}</pre>`);
                     });
+
+                bus.on("*", (ev, data) => {
+                    if (ev !== "log:out" && ev !== "log:err")
+                        console.log(`${ev}, ${JSON.stringify(data)}`);
+                });
             });
 
             this.testProbes();
