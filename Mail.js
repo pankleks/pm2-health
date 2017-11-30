@@ -8,6 +8,10 @@ class Mail {
         this._config = _config;
         this._template = "<p><!-- body --></p><p><!-- timeStamp --></p>";
         if (!this._config.smtp)
+            this._config.smtp = { disabled: true };
+        if (this._config.smtp.disabled === true)
+            return; // don't analyze config if disabled
+        if (!this._config.smtp)
             throw new Error(`[smtp] not set`);
         if (!this._config.smtp.host)
             throw new Error(`[smtp.host] not set`);
@@ -23,6 +27,8 @@ class Mail {
         }
     }
     async send(subject, body, attachements = []) {
+        if (this._config.smtp.disabled === true)
+            return;
         let temp = {
             host: this._config.smtp.host,
             port: this._config.smtp.port,

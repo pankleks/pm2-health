@@ -1,6 +1,6 @@
 {
   "name": "pm2-health",
-  "version": "1.4.17",
+  "version": "1.4.18",
   "description": "Apps health monitor and mail notification module for pm2",
   "main": "App.js",
   "scripts": {
@@ -36,7 +36,8 @@
       "host": "your-smtp-host",
       "port": 587,
       "user": "your-smtp-user",
-      "password": "your-smtp-password"
+      "password": "your-smtp-password",
+      "disabled": false
     },
     "mailTo": "mail1,mail2",
     "replyTo": "",

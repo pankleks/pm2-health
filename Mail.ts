@@ -4,10 +4,11 @@ import { hostname } from "os";
 
 export interface ISmtpConfig {
     smtp: {
-        host: string;
-        port: number;
-        user: string;
-        password: string;
+        host?: string;
+        port?: number;
+        user?: string;
+        password?: string;
+        disabled: boolean;
     },
     mailTo: string;
     replyTo: string;
@@ -17,6 +18,12 @@ export class Mail {
     private _template = "<p><!-- body --></p><p><!-- timeStamp --></p>";
 
     constructor(private _config: ISmtpConfig) {
+        if (!this._config.smtp)
+            this._config.smtp = { disabled: true };
+
+        if (this._config.smtp.disabled === true)
+            return; // don't analyze config if disabled
+
         if (!this._config.smtp)
             throw new Error(`[smtp] not set`);
         if (!this._config.smtp.host)
@@ -35,6 +42,8 @@ export class Mail {
     }
 
     async send(subject: string, body: string, attachements = []) {
+        if (this._config.smtp.disabled === true)
+            return;
         let
             temp = {
                 host: this._config.smtp.host,

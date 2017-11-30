@@ -23,7 +23,8 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
         "host": "your-smtp-host",
         "port": 587,
         "user": "your-smtp-user",
-        "password": "your-smtp-password"
+        "password": "your-smtp-password",
+        "disabled": false
     },
     "mailTo": "mail1,mail2"
 }
