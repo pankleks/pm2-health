@@ -21,10 +21,10 @@ interface IConfig extends ISmtpConfig, IShapshotConfig {
     events: string[];
     probes: {
         [key: string]: {
-            target: any;
-            op: "<" | ">" | "=" | "<=" | ">=" | "!=";
-            ifChanged: boolean;
-            noHistory: boolean;
+            target?: any;
+            op?: "<" | ">" | "=" | "<=" | ">=" | "!=";
+            ifChanged?: boolean;
+            noHistory?: boolean;
             disabled: boolean;
         }
     }
@@ -179,7 +179,7 @@ export class Health {
                     let
                         probe = this._config.probes[key];
                     if (!probe)
-                        continue;
+                        probe = { disabled: true };
 
                     let
                         temp = parseFloat(monit[key].value),

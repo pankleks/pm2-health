@@ -114,7 +114,7 @@ class Health {
                 for (let key of Object.keys(monit)) {
                     let probe = this._config.probes[key];
                     if (!probe)
-                        continue;
+                        probe = { disabled: true };
                     let temp = parseFloat(monit[key].value), v = isNaN(temp) ? monit[key].value : temp, bad;
                     if (probe.op && probe.op in OP && probe.target != null)
                         bad = OP[probe.op](v, probe.target);
