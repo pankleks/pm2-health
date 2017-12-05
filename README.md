@@ -141,7 +141,7 @@ Set config to:
 
 ## Hold notifications temporarily
 
-To hold mail notification: `pm2 trigger pm2-health hold`
+To hold mail notification: `pm2 trigger pm2-health hold 30`
 
 > Notifications will restart automatically after 30 minutes.
 

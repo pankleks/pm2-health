@@ -121,10 +121,23 @@ export class Health {
             this.testProbes();
         });
 
-        Pmx.action("hold", (reply) => {
+        Pmx.action("hold", (p, reply) => {
+            let
+                t = HOLD_PERIOD_M;
+            if (p) {
+                let
+                    n = parseInt(p);
+                if (!isNaN(n))
+                    t = n;
+            }
+
             this._holdTill = new Date();
-            this._holdTill.setTime(this._holdTill.getTime() + HOLD_PERIOD_M * 60000);
-            reply(`mail held till ${this._holdTill.toISOString()}`);
+            this._holdTill.setTime(this._holdTill.getTime() + t * 60000);
+
+            let
+                msg = `mail held for ${t} minutes, till ${this._holdTill.toISOString()}`;
+            console.log(msg);
+            reply(msg);
         });
 
         Pmx.action("unhold", (reply) => {
