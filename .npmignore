@@ -1,0 +1,7 @@
+.npmignore
+.gitignore
+.vscode
+*.js.map
+*.ts
+package-lock.json
+tsconfig.json
