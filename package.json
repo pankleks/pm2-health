@@ -1,6 +1,6 @@
 {
   "name": "pm2-health",
-  "version": "1.4.28",
+  "version": "1.4.29",
   "description": "Apps health monitor and mail notification module for pm2",
   "main": "App.js",
   "scripts": {
@@ -9,12 +9,13 @@
   "author": "Krzysztof Heim",
   "license": "MIT",
   "dependencies": {
-    "nodemailer": "^4.4.0",
-    "pm2": "^2.8.0"
+    "nodemailer": "^4.4.2",
+    "planck-http-fetch": "^1.0.5",
+    "pm2": "^2.9.3"
   },
   "devDependencies": {
-    "@types/node": "^8.0.52",
-    "@types/nodemailer": "^4.3.1"
+    "@types/node": "^9.4.0",
+    "@types/nodemailer": "^4.3.2"
   },
   "keywords": [
     "pm2",

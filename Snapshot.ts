@@ -1,6 +1,6 @@
 import * as Fs from "fs";
 import { hostname } from "os";
-import { httpFetch } from "./Http";
+import { Fetch } from "planck-http-fetch";
 
 export interface IShapshotConfig {
     snapshot: {
@@ -73,7 +73,7 @@ export class Snapshot {
 
         try {
             this._data.timeStamp = new Date().getTime();
-            await httpFetch(this._config.snapshot.url, JSON.stringify(this._data));
+            await new Fetch(this._config.snapshot.url).fetch(JSON.stringify(this._data));
         }
         catch (ex) {
             console.error(`http push failed: ${ex.message || ex}`);

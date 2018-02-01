@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Fs = require("fs");
 const os_1 = require("os");
-const Http_1 = require("./Http");
+const planck_http_fetch_1 = require("planck-http-fetch");
 class Snapshot {
     constructor(_config) {
         this._config = _config;
@@ -36,7 +36,7 @@ class Snapshot {
             return;
         try {
             this._data.timeStamp = new Date().getTime();
-            await Http_1.httpFetch(this._config.snapshot.url, JSON.stringify(this._data));
+            await new planck_http_fetch_1.Fetch(this._config.snapshot.url).fetch(JSON.stringify(this._data));
         }
         catch (ex) {
             console.error(`http push failed: ${ex.message || ex}`);
