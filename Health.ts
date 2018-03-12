@@ -1,5 +1,6 @@
 import * as PM2 from "pm2";
 import * as Pmx from "pmx";
+import * as Fs from "fs";
 import { basename, join } from "path";
 import { Mail, ISmtpConfig } from "./Mail";
 import { Snapshot, IShapshotConfig } from "./Snapshot";
@@ -158,6 +159,17 @@ export class Health {
         Pmx.action("dump", (reply) => {
             this._snapshot.dump();
             reply(`dumping`);
+        });
+
+        // for dev. only
+        Pmx.action("debug", reply => {
+            PM2.list((ex, list) => {
+                stopIfEx(ex);
+
+                Fs.writeFileSync(`pm2-health-debug.json`, JSON.stringify(list), "utf8");
+
+                reply(`dumping`);
+            });
         });
     }
 

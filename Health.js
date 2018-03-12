@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const PM2 = require("pm2");
 const Pmx = require("pmx");
+const Fs = require("fs");
 const path_1 = require("path");
 const Mail_1 = require("./Mail");
 const Snapshot_1 = require("./Snapshot");
@@ -97,6 +98,14 @@ class Health {
         Pmx.action("dump", (reply) => {
             this._snapshot.dump();
             reply(`dumping`);
+        });
+        // for dev. only
+        Pmx.action("debug", reply => {
+            PM2.list((ex, list) => {
+                stopIfEx(ex);
+                Fs.writeFileSync(`pm2-health-debug.json`, JSON.stringify(list), "utf8");
+                reply(`dumping`);
+            });
         });
     }
     async mail(subject, body, attachements = []) {
