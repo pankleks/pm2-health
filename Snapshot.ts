@@ -61,7 +61,7 @@ export class Snapshot {
 
     dump() {
         this._data.timeStamp = new Date().getTime();
-        Fs.writeFile(`History_${new Date().toISOString()}.json`, JSON.stringify(this._data), (ex) => {
+        Fs.writeFile(`./History_${new Date().toISOString()}.json`, JSON.stringify(this._data), (ex) => {
             if (ex)
                 console.error(`Can't dump history, ${ex.message || ex}`);
         });

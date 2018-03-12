@@ -1,7 +1,7 @@
 import * as PM2 from "pm2";
 import * as Pmx from "pmx";
 import * as Fs from "fs";
-import { basename, join } from "path";
+import { basename, join, parse } from "path";
 import { Mail, ISmtpConfig } from "./Mail";
 import { Snapshot, IShapshotConfig } from "./Snapshot";
 
@@ -28,6 +28,7 @@ interface IConfig extends ISmtpConfig, IShapshotConfig {
             noHistory?: boolean;
             noNotify: boolean;
             exclude?: boolean;
+            direct?: boolean;
         }
     }
     metricIntervalS: number;
@@ -166,7 +167,7 @@ export class Health {
             PM2.list((ex, list) => {
                 stopIfEx(ex);
 
-                Fs.writeFileSync(`pm2-health-debug.json`, JSON.stringify(list), "utf8");
+                Fs.writeFileSync(`./pm2-health-debug.json`, JSON.stringify(list), "utf8");
 
                 reply(`dumping`);
             });
@@ -210,19 +211,34 @@ export class Health {
                     monit["cpu"] = { value: e.monit.cpu };
                 }
 
+                if (e.pm2_env) {
+                    if (e.pm2_env["_pm2_version"])
+                        monit["pm2"] = { value: e.pm2_env["_pm2_version"], direct: true };
+
+                    if (e.pm2_env["node_version"])
+                        monit["node"] = { value: e.pm2_env["node_version"], direct: true };
+                }
+
                 for (let key of Object.keys(monit)) {
                     let
                         probe = this._config.metric[key];
                     if (!probe)
-                        probe = { noNotify: true };
+                        probe = { noNotify: true, direct: monit[key].direct === true, noHistory: monit[key].direct === true };
 
                     if (probe.exclude === true)
                         continue;
 
                     let
-                        temp = parseFloat(monit[key].value),
-                        v = isNaN(temp) ? monit[key].value : temp,
+                        v = monit[key].value,
                         bad: boolean;
+
+                    if (!probe.direct) {
+                        v = Number.parseFloat(v);
+                        if (Number.isNaN(v)) {
+                            console.error(`monit [${key}] is not a number`);
+                            continue;
+                        }
+                    }
 
                     if (probe.op && probe.op in OP && probe.target != null)
                         bad = OP[probe.op](v, probe.target);
