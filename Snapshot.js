@@ -36,7 +36,10 @@ class Snapshot {
             return;
         try {
             this._data.timeStamp = new Date().getTime();
-            await new planck_http_fetch_1.Fetch(this._config.snapshot.url).fetch(JSON.stringify(this._data));
+            let fetch = new planck_http_fetch_1.Fetch(this._config.snapshot.url);
+            if (this._config.snapshot.auth && this._config.snapshot.auth.user)
+                fetch.basicAuth(this._config.snapshot.auth.user, this._config.snapshot.auth.password);
+            await fetch.fetch(JSON.stringify(this._data));
         }
         catch (ex) {
             console.error(`http push failed: ${ex.message || ex}`);

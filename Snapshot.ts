@@ -5,6 +5,10 @@ import { Fetch } from "planck-http-fetch";
 export interface IShapshotConfig {
     snapshot: {
         url?: string;
+        auth?: {
+            user: string;
+            password: string;
+        },
         token?: string;
         disabled?: boolean;
     }
@@ -73,7 +77,14 @@ export class Snapshot {
 
         try {
             this._data.timeStamp = new Date().getTime();
-            await new Fetch(this._config.snapshot.url).fetch(JSON.stringify(this._data));
+
+            let
+                fetch = new Fetch(this._config.snapshot.url);
+
+            if (this._config.snapshot.auth && this._config.snapshot.auth.user)  // auth
+                fetch.basicAuth(this._config.snapshot.auth.user, this._config.snapshot.auth.password);
+
+            await fetch.fetch(JSON.stringify(this._data));
         }
         catch (ex) {
             console.error(`http push failed: ${ex.message || ex}`);
