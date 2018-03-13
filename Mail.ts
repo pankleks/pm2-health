@@ -50,7 +50,7 @@ export class Mail {
                 host: this._config.smtp.host,
                 port: this._config.smtp.port,
                 tls: { rejectUnauthorized: false },
-                secure: false,
+                secure: this._config.smtp.secure === true,
                 auth: null
             };
 
@@ -59,9 +59,6 @@ export class Mail {
                 user: this._config.smtp.user,
                 pass: this._config.smtp.password
             };
-
-        if (this._config.smtp.secure)
-            temp.secure = this._config.smtp.secure
 
         let
             transport = Mailer.createTransport(temp);
