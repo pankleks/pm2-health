@@ -8,6 +8,7 @@ export interface ISmtpConfig {
         port?: number;
         user?: string;
         password?: string;
+        secure?: boolean;
         disabled: boolean;
     },
     mailTo: string;
@@ -48,6 +49,8 @@ export class Mail {
             temp = {
                 host: this._config.smtp.host,
                 port: this._config.smtp.port,
+                tls: { rejectUnauthorized: false },
+                secure: this._config.smtp.secure === true,
                 auth: null
             };
 

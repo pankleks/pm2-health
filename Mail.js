@@ -32,6 +32,8 @@ class Mail {
         let temp = {
             host: this._config.smtp.host,
             port: this._config.smtp.port,
+            tls: { rejectUnauthorized: false },
+            secure: this._config.smtp.secure === true,
             auth: null
         };
         if (this._config.smtp.user)
