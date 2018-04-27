@@ -6,14 +6,15 @@ const Fs = require("fs");
 const path_1 = require("path");
 const Mail_1 = require("./Mail");
 const Snapshot_1 = require("./Snapshot");
-const MERTIC_INTERVAL_S = 60, HOLD_PERIOD_M = 30, LOGS = ["pm_err_log_path", "pm_out_log_path"], OP = {
+const planck_http_fetch_1 = require("planck-http-fetch");
+const MERTIC_INTERVAL_S = 60, CONIFG_FETCH_INVERVAL_M = 10, HOLD_PERIOD_M = 30, LOGS = ["pm_err_log_path", "pm_out_log_path"], OP = {
     "<": (a, b) => a < b,
     ">": (a, b) => a > b,
     "=": (a, b) => a === b,
     "<=": (a, b) => a <= b,
     ">=": (a, b) => a >= b,
     "!=": (a, b) => a != b
-};
+}, CONFIG_KEYS = ["events", "metric", "exceptions", "messages", "messageExcludeExps", "appsExcluded", "metricIntervalS", "addLogs"];
 class Health {
     constructor(_config) {
         this._config = _config;
@@ -25,14 +26,42 @@ class Health {
         this._mail = new Mail_1.Mail(_config);
         this._snapshot = new Snapshot_1.Snapshot(this._config);
     }
+    async fetchConfig() {
+        try {
+            console.log(`fetching config from [${this._config.webConfig.url}]`);
+            let fetch = new planck_http_fetch_1.Fetch(this._config.webConfig.url);
+            if (this._config.webConfig.auth && this._config.webConfig.auth.user) // auth
+                fetch.basicAuth(this._config.webConfig.auth.user, this._config.webConfig.auth.password);
+            let json = await fetch.fetch(), config = JSON.parse(json);
+            // map config keys
+            for (let key of CONFIG_KEYS)
+                if (config[key])
+                    this._config[key] = config[key];
+            this.configChanged();
+        }
+        catch (ex) {
+            console.error(`failed to fetch config -> ${ex.message || ex}`);
+        }
+    }
+    configChanged() {
+        this._messageExcludeExps = [];
+        if (Array.isArray(this._config.messageExcludeExps))
+            this._messageExcludeExps = this._config.messageExcludeExps.map(e => new RegExp(e));
+    }
     isAppExcluded(app) {
         return app === "pm2-health" || (Array.isArray(this._config.appsExcluded) && this._config.appsExcluded.indexOf(app) !== -1);
     }
-    go() {
+    async go() {
         console.log(`pm2-health is on`);
-        let exps = [];
-        if (Array.isArray(this._config.messageExcludeExps))
-            exps = this._config.messageExcludeExps.map(e => new RegExp(e));
+        this.configChanged();
+        // fetch web config (if set)
+        if (this._config.webConfig && this._config.webConfig.url) {
+            await this.fetchConfig();
+            if (this._config.webConfig.fetchIntervalM > 0)
+                setInterval(() => {
+                    this.fetchConfig();
+                }, this._config.webConfig.fetchIntervalM * 60 * 1000);
+        }
         PM2.connect((ex) => {
             stopIfEx(ex);
             PM2.launchBus((ex, bus) => {
@@ -60,7 +89,7 @@ class Health {
                         if (this.isAppExcluded(data.process.name))
                             return;
                         let json = JSON.stringify(data.data, undefined, 4);
-                        if (exps.some(e => e.test(json)))
+                        if (this._messageExcludeExps.some(e => e.test(json)))
                             return; // exclude
                         this.mail(`${data.process.name}:${data.process.pm_id} - message`, `
                             <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
@@ -161,7 +190,7 @@ class Health {
                     if (probe.noNotify !== true && bad === true && (probe.ifChanged !== true || this._snapshot.last(e.pm_id, key) !== v))
                         alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${this._snapshot.last(e.pm_id, key)}</td><td>${probe.target}</td></tr>`);
                     let data = { v };
-                    if (bad)
+                    if (bad) // safe space by not storing false
                         data.bad = true;
                     this._snapshot.push(e.pm_id, e.name, key, !probe.noHistory, data);
                 }

@@ -2,13 +2,15 @@ import * as Fs from "fs";
 import { hostname } from "os";
 import { Fetch } from "planck-http-fetch";
 
+export interface IAuth {
+    user: string;
+    password: string;
+}
+
 export interface IShapshotConfig {
     snapshot: {
         url?: string;
-        auth?: {
-            user: string;
-            password: string;
-        },
+        auth?: IAuth,
         token?: string;
         disabled?: boolean;
     }
