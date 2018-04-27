@@ -7,6 +7,7 @@ const path_1 = require("path");
 const Mail_1 = require("./Mail");
 const Snapshot_1 = require("./Snapshot");
 const planck_http_fetch_1 = require("planck-http-fetch");
+const Log_1 = require("./Log");
 const MERTIC_INTERVAL_S = 60, CONIFG_FETCH_INVERVAL_M = 10, HOLD_PERIOD_M = 30, LOGS = ["pm_err_log_path", "pm_out_log_path"], OP = {
     "<": (a, b) => a < b,
     ">": (a, b) => a > b,
@@ -28,19 +29,21 @@ class Health {
     }
     async fetchConfig() {
         try {
-            console.log(`fetching config from [${this._config.webConfig.url}]`);
+            Log_1.info(`fetching config from [${this._config.webConfig.url}]`);
             let fetch = new planck_http_fetch_1.Fetch(this._config.webConfig.url);
             if (this._config.webConfig.auth && this._config.webConfig.auth.user) // auth
                 fetch.basicAuth(this._config.webConfig.auth.user, this._config.webConfig.auth.password);
             let json = await fetch.fetch(), config = JSON.parse(json);
             // map config keys
             for (let key of CONFIG_KEYS)
-                if (config[key])
+                if (config[key]) {
                     this._config[key] = config[key];
+                    Log_1.info(`applying [${key}]`);
+                }
             this.configChanged();
         }
         catch (ex) {
-            console.error(`failed to fetch config -> ${ex.message || ex}`);
+            Log_1.error(`failed to fetch config -> ${ex.message || ex}`);
         }
     }
     configChanged() {
@@ -52,7 +55,7 @@ class Health {
         return app === "pm2-health" || (Array.isArray(this._config.appsExcluded) && this._config.appsExcluded.indexOf(app) !== -1);
     }
     async go() {
-        console.log(`pm2-health is on`);
+        Log_1.info(`pm2-health is on`);
         this.configChanged();
         // fetch web config (if set)
         if (this._config.webConfig && this._config.webConfig.url) {
@@ -108,7 +111,7 @@ class Health {
             this._holdTill = new Date();
             this._holdTill.setTime(this._holdTill.getTime() + t * 60000);
             let msg = `mail held for ${t} minutes, till ${this._holdTill.toISOString()}`;
-            console.log(msg);
+            Log_1.info(msg);
             reply(msg);
         });
         Pmx.action("unhold", (reply) => {
@@ -143,10 +146,10 @@ class Health {
             return; // skip
         try {
             await this._mail.send(subject, body, attachements);
-            console.log(`mail send: ${subject}`);
+            Log_1.info(`mail send: ${subject}`);
         }
         catch (ex) {
-            console.error(`mail failed: ${ex.message || ex}`);
+            Log_1.error(`mail failed: ${ex.message || ex}`);
         }
     }
     testProbes() {

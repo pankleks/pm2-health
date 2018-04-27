@@ -5,6 +5,7 @@ import { basename, join, parse } from "path";
 import { Mail, ISmtpConfig } from "./Mail";
 import { Snapshot, IShapshotConfig, IAuth } from "./Snapshot";
 import { Fetch } from "planck-http-fetch";
+import { info, error } from "./Log";
 
 const
     MERTIC_INTERVAL_S = 60,
@@ -68,7 +69,7 @@ export class Health {
 
     async fetchConfig() {
         try {
-            console.log(`fetching config from [${this._config.webConfig.url}]`);
+            info(`fetching config from [${this._config.webConfig.url}]`);
 
             let
                 fetch = new Fetch(this._config.webConfig.url);
@@ -80,13 +81,15 @@ export class Health {
 
             // map config keys
             for (let key of CONFIG_KEYS)
-                if (config[key])
+                if (config[key]) {
                     this._config[key] = config[key];
+                    info(`applying [${key}]`);
+                }
 
             this.configChanged();
         }
         catch (ex) {
-            console.error(`failed to fetch config -> ${ex.message || ex}`);
+            error(`failed to fetch config -> ${ex.message || ex}`);
         }
     }
 
@@ -103,7 +106,7 @@ export class Health {
     }
 
     async go() {
-        console.log(`pm2-health is on`);
+        info(`pm2-health is on`);
 
         this.configChanged();
 
@@ -190,7 +193,7 @@ export class Health {
 
             let
                 msg = `mail held for ${t} minutes, till ${this._holdTill.toISOString()}`;
-            console.log(msg);
+            info(msg);
             reply(msg);
         });
 
@@ -234,10 +237,10 @@ export class Health {
 
         try {
             await this._mail.send(subject, body, attachements);
-            console.log(`mail send: ${subject}`);
+            info(`mail send: ${subject}`);
         }
         catch (ex) {
-            console.error(`mail failed: ${ex.message || ex}`);
+            error(`mail failed: ${ex.message || ex}`);
         }
     }
 
