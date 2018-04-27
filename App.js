@@ -13,10 +13,10 @@ Pmx.initModule({
         cpu: true,
         mem: true
     }
-}, (ex, config) => {
+}, async (ex, config) => {
     Health_1.stopIfEx(ex);
     try {
-        new Health_1.Health(config).go();
+        await (new Health_1.Health(config)).go();
     }
     catch (ex) {
         Health_1.stopIfEx(ex);

@@ -57,6 +57,8 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 * `appsExcluded` - list of app names to exclude from monitoring (optional)
 
+* `webConfig` - if set, some of the config settings can be downloaded from given url (optional). See [Web config](#web-config)
+
 ## Metrics monitoring
 
 `pm2-health` can monitor any PMX metrics defined in your apps.
@@ -138,6 +140,29 @@ Set config to:
 ]
 ```
 > Remember to escape regex string to JSON string
+
+## Web config
+
+Web config (added in 1.7.0) allows you to fetch some of the config settings from web url.
+
+Sample config:
+
+```json
+{
+    "webConfig": {
+        "url": "url of JSON file",
+        "auth": {
+            "user": "...",
+            "password": "..."
+        },
+        "fetchIntervalM": 10
+    }
+}
+```
+
+Url must return UTF-8 JSON with config properties.
+
+> Only following properties can be used: `events`, `metric`, `exceptions`, `messages`, `messageExcludeExps`, `appsExcluded`, `metricIntervalS`, `addLogs`
 
 ## Hold notifications temporarily
 

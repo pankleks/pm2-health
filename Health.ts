@@ -3,10 +3,12 @@ import * as Pmx from "pmx";
 import * as Fs from "fs";
 import { basename, join, parse } from "path";
 import { Mail, ISmtpConfig } from "./Mail";
-import { Snapshot, IShapshotConfig } from "./Snapshot";
+import { Snapshot, IShapshotConfig, IAuth } from "./Snapshot";
+import { Fetch } from "planck-http-fetch";
 
 const
     MERTIC_INTERVAL_S = 60,
+    CONIFG_FETCH_INVERVAL_M = 10,
     HOLD_PERIOD_M = 30,
     LOGS = ["pm_err_log_path", "pm_out_log_path"],
     OP = {
@@ -16,9 +18,10 @@ const
         "<=": (a, b) => a <= b,
         ">=": (a, b) => a >= b,
         "!=": (a, b) => a != b
-    }
+    },
+    CONFIG_KEYS = ["events", "metric", "exceptions", "messages", "messageExcludeExps", "appsExcluded", "metricIntervalS", "addLogs"];
 
-interface IConfig extends ISmtpConfig, IShapshotConfig {
+interface IMonitConfig {
     events: string[];
     metric: {
         [key: string]: {
@@ -30,13 +33,21 @@ interface IConfig extends ISmtpConfig, IShapshotConfig {
             exclude?: boolean;
             direct?: boolean;
         }
-    }
-    metricIntervalS: number;
-    addLogs: boolean;
+    },
     exceptions: boolean;
     messages: boolean;
     messageExcludeExps: string;
     appsExcluded: string[];
+    metricIntervalS: number;
+    addLogs: boolean;
+}
+
+interface IConfig extends IMonitConfig, ISmtpConfig, IShapshotConfig {
+    webConfig: {
+        url: string;
+        auth?: IAuth;
+        fetchIntervalM: number;
+    }
 }
 
 export class Health {
@@ -55,17 +66,58 @@ export class Health {
         this._snapshot = new Snapshot(this._config);
     }
 
+    async fetchConfig() {
+        try {
+            console.log(`fetching config from [${this._config.webConfig.url}]`);
+
+            let
+                fetch = new Fetch(this._config.webConfig.url);
+            if (this._config.webConfig.auth && this._config.webConfig.auth.user)  // auth
+                fetch.basicAuth(this._config.webConfig.auth.user, this._config.webConfig.auth.password);
+            let
+                json = await fetch.fetch(),
+                config = JSON.parse(json);
+
+            // map config keys
+            for (let key of CONFIG_KEYS)
+                if (config[key])
+                    this._config[key] = config[key];
+
+            this.configChanged();
+        }
+        catch (ex) {
+            console.error(`failed to fetch config -> ${ex.message || ex}`);
+        }
+    }
+
+    _messageExcludeExps: RegExp[];
+
+    configChanged() {
+        this._messageExcludeExps = [];
+        if (Array.isArray(this._config.messageExcludeExps))
+            this._messageExcludeExps = this._config.messageExcludeExps.map(e => new RegExp(e));
+    }
+
     isAppExcluded(app: string) {
         return app === "pm2-health" || (Array.isArray(this._config.appsExcluded) && this._config.appsExcluded.indexOf(app) !== -1);
     }
 
-    go() {
+    async go() {
         console.log(`pm2-health is on`);
 
-        let
-            exps: RegExp[] = [];
-        if (Array.isArray(this._config.messageExcludeExps))
-            exps = this._config.messageExcludeExps.map(e => new RegExp(e));
+        this.configChanged();
+
+        // fetch web config (if set)
+        if (this._config.webConfig && this._config.webConfig.url) {
+            await this.fetchConfig();
+
+            if (this._config.webConfig.fetchIntervalM > 0)
+                setInterval(
+                    () => {
+                        this.fetchConfig();
+                    },
+                    this._config.webConfig.fetchIntervalM * 60 * 1000);
+        }
 
         PM2.connect((ex) => {
             stopIfEx(ex);
@@ -109,7 +161,7 @@ export class Health {
                         let
                             json = JSON.stringify(data.data, undefined, 4);
 
-                        if (exps.some(e => e.test(json)))
+                        if (this._messageExcludeExps.some(e => e.test(json)))
                             return; // exclude
 
                         this.mail(
