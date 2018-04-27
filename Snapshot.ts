@@ -69,7 +69,7 @@ export class Snapshot {
         this._data.timeStamp = new Date().getTime();
         Fs.writeFile(`./History_${new Date().toISOString()}.json`, JSON.stringify(this._data), (ex) => {
             if (ex)
-                console.error(`Can't dump history, ${ex.message || ex}`);
+                console.error(`can't dump history -> ${ex.message || ex}`);
         });
     }
 
@@ -89,7 +89,7 @@ export class Snapshot {
             await fetch.fetch(JSON.stringify(this._data));
         }
         catch (ex) {
-            console.error(`http push failed: ${ex.message || ex}`);
+            console.error(`snapshot push failed -> ${ex.message || ex}`);
         }
     }
 }

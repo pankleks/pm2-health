@@ -237,10 +237,10 @@ export class Health {
 
         try {
             await this._mail.send(subject, body, attachements);
-            info(`mail send: ${subject}`);
+            info(`mail send [${subject}]`);
         }
         catch (ex) {
-            error(`mail failed: ${ex.message || ex}`);
+            error(`mail failed -> ${ex.message || ex}`);
         }
     }
 
