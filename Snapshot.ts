@@ -1,6 +1,7 @@
 import * as Fs from "fs";
 import { hostname } from "os";
 import { Fetch } from "planck-http-fetch";
+import { error } from "./Log";
 
 export interface IAuth {
     user: string;
@@ -69,7 +70,7 @@ export class Snapshot {
         this._data.timeStamp = new Date().getTime();
         Fs.writeFile(`./History_${new Date().toISOString()}.json`, JSON.stringify(this._data), (ex) => {
             if (ex)
-                console.error(`can't dump history -> ${ex.message || ex}`);
+                error(`can't dump history -> ${ex.message || ex}`);
         });
     }
 
@@ -80,8 +81,7 @@ export class Snapshot {
         try {
             this._data.timeStamp = new Date().getTime();
 
-            let
-                fetch = new Fetch(this._config.snapshot.url);
+            const fetch = new Fetch(this._config.snapshot.url);
 
             if (this._config.snapshot.auth && this._config.snapshot.auth.user)  // auth
                 fetch.basicAuth(this._config.snapshot.auth.user, this._config.snapshot.auth.password);
@@ -89,7 +89,7 @@ export class Snapshot {
             await fetch.fetch(JSON.stringify(this._data));
         }
         catch (ex) {
-            console.error(`snapshot push failed -> ${ex.message || ex}`);
+            error(`snapshot push failed -> ${ex.message || ex}`);
         }
     }
 }

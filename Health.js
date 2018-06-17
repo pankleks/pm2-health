@@ -8,7 +8,7 @@ const Mail_1 = require("./Mail");
 const Snapshot_1 = require("./Snapshot");
 const planck_http_fetch_1 = require("planck-http-fetch");
 const Log_1 = require("./Log");
-const MERTIC_INTERVAL_S = 60, CONIFG_FETCH_INVERVAL_M = 10, HOLD_PERIOD_M = 30, LOGS = ["pm_err_log_path", "pm_out_log_path"], OP = {
+const MERTIC_INTERVAL_S = 60, HOLD_PERIOD_M = 30, LOGS = ["pm_err_log_path", "pm_out_log_path"], OP = {
     "<": (a, b) => a < b,
     ">": (a, b) => a > b,
     "=": (a, b) => a === b,
@@ -30,12 +30,12 @@ class Health {
     async fetchConfig() {
         try {
             Log_1.info(`fetching config from [${this._config.webConfig.url}]`);
-            let fetch = new planck_http_fetch_1.Fetch(this._config.webConfig.url);
+            const fetch = new planck_http_fetch_1.Fetch(this._config.webConfig.url);
             if (this._config.webConfig.auth && this._config.webConfig.auth.user) // auth
                 fetch.basicAuth(this._config.webConfig.auth.user, this._config.webConfig.auth.password);
-            let json = await fetch.fetch(), config = JSON.parse(json);
+            const json = await fetch.fetch(), config = JSON.parse(json);
             // map config keys
-            for (let key of CONFIG_KEYS)
+            for (const key of CONFIG_KEYS)
                 if (config[key]) {
                     this._config[key] = config[key];
                     Log_1.info(`applying [${key}]`);
@@ -91,7 +91,7 @@ class Health {
                     bus.on("process:msg", (data) => {
                         if (this.isAppExcluded(data.process.name))
                             return;
-                        let json = JSON.stringify(data.data, undefined, 4);
+                        const json = JSON.stringify(data.data, undefined, 4);
                         if (this._messageExcludeExps.some(e => e.test(json)))
                             return; // exclude
                         this.mail(`${data.process.name}:${data.process.pm_id} - message`, `
@@ -104,13 +104,13 @@ class Health {
         Pmx.action("hold", (p, reply) => {
             let t = HOLD_PERIOD_M;
             if (p) {
-                let n = parseInt(p);
-                if (!isNaN(n))
+                const n = Number.parseInt(p);
+                if (!Number.isNaN(n))
                     t = n;
             }
             this._holdTill = new Date();
             this._holdTill.setTime(this._holdTill.getTime() + t * 60000);
-            let msg = `mail held for ${t} minutes, till ${this._holdTill.toISOString()}`;
+            const msg = `mail held for ${t} minutes, till ${this._holdTill.toISOString()}`;
             Log_1.info(msg);
             reply(msg);
         });
@@ -146,10 +146,10 @@ class Health {
             return; // skip
         try {
             await this._mail.send(subject, body, attachements);
-            Log_1.info(`mail send: ${subject}`);
+            Log_1.info(`mail [${subject}] sent`);
         }
         catch (ex) {
-            Log_1.error(`mail failed: ${ex.message || ex}`);
+            Log_1.error(`mail failed -> ${ex.message || ex}`);
         }
     }
     testProbes() {

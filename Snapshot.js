@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Fs = require("fs");
 const os_1 = require("os");
 const planck_http_fetch_1 = require("planck-http-fetch");
+const Log_1 = require("./Log");
 class Snapshot {
     constructor(_config) {
         this._config = _config;
@@ -28,7 +29,7 @@ class Snapshot {
         this._data.timeStamp = new Date().getTime();
         Fs.writeFile(`./History_${new Date().toISOString()}.json`, JSON.stringify(this._data), (ex) => {
             if (ex)
-                console.error(`Can't dump history, ${ex.message || ex}`);
+                Log_1.error(`can't dump history -> ${ex.message || ex}`);
         });
     }
     async send() {
@@ -36,13 +37,13 @@ class Snapshot {
             return;
         try {
             this._data.timeStamp = new Date().getTime();
-            let fetch = new planck_http_fetch_1.Fetch(this._config.snapshot.url);
+            const fetch = new planck_http_fetch_1.Fetch(this._config.snapshot.url);
             if (this._config.snapshot.auth && this._config.snapshot.auth.user) // auth
                 fetch.basicAuth(this._config.snapshot.auth.user, this._config.snapshot.auth.password);
             await fetch.fetch(JSON.stringify(this._data));
         }
         catch (ex) {
-            console.error(`http push failed: ${ex.message || ex}`);
+            Log_1.error(`snapshot push failed -> ${ex.message || ex}`);
         }
     }
 }

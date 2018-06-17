@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Mailer = require("nodemailer");
 const Fs = require("fs");
 const os_1 = require("os");
+const Log_1 = require("./Log");
 class Mail {
     constructor(_config) {
         this._config = _config;
@@ -23,13 +24,13 @@ class Mail {
             this._template = Fs.readFileSync("Template.html", "utf8");
         }
         catch (_a) {
-            console.log(`Template.html not found`);
+            Log_1.info(`Template.html not found`);
         }
     }
     async send(subject, body, attachements = []) {
         if (this._config.smtp.disabled === true)
             return;
-        let temp = {
+        const temp = {
             host: this._config.smtp.host,
             port: this._config.smtp.port,
             tls: { rejectUnauthorized: false },
@@ -41,10 +42,10 @@ class Mail {
                 user: this._config.smtp.user,
                 pass: this._config.smtp.password
             };
-        let transport = Mailer.createTransport(temp);
+        const transport = Mailer.createTransport(temp);
         await transport.sendMail({
             to: this._config.mailTo,
-            from: this._config.smtp.user,
+            from: this._config.smtp.from || this._config.smtp.user,
             replyTo: this._config.replyTo,
             subject: `pm2-health: ${os_1.hostname()}, ${subject}`,
             html: this._template

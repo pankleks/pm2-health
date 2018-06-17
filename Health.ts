@@ -1,7 +1,7 @@
 import * as PM2 from "pm2";
 import * as Pmx from "pmx";
 import * as Fs from "fs";
-import { basename, join, parse } from "path";
+import { basename } from "path";
 import { Mail, ISmtpConfig } from "./Mail";
 import { Snapshot, IShapshotConfig, IAuth } from "./Snapshot";
 import { Fetch } from "planck-http-fetch";
@@ -9,7 +9,6 @@ import { info, error } from "./Log";
 
 const
     MERTIC_INTERVAL_S = 60,
-    CONIFG_FETCH_INVERVAL_M = 10,
     HOLD_PERIOD_M = 30,
     LOGS = ["pm_err_log_path", "pm_out_log_path"],
     OP = {
@@ -71,16 +70,15 @@ export class Health {
         try {
             info(`fetching config from [${this._config.webConfig.url}]`);
 
-            let
-                fetch = new Fetch(this._config.webConfig.url);
+            const fetch = new Fetch(this._config.webConfig.url);
             if (this._config.webConfig.auth && this._config.webConfig.auth.user)  // auth
                 fetch.basicAuth(this._config.webConfig.auth.user, this._config.webConfig.auth.password);
-            let
+            const
                 json = await fetch.fetch(),
                 config = JSON.parse(json);
 
             // map config keys
-            for (let key of CONFIG_KEYS)
+            for (const key of CONFIG_KEYS)
                 if (config[key]) {
                     this._config[key] = config[key];
                     info(`applying [${key}]`);
@@ -161,8 +159,7 @@ export class Health {
                         if (this.isAppExcluded(data.process.name))
                             return;
 
-                        let
-                            json = JSON.stringify(data.data, undefined, 4);
+                        const json = JSON.stringify(data.data, undefined, 4);
 
                         if (this._messageExcludeExps.some(e => e.test(json)))
                             return; // exclude
@@ -179,20 +176,17 @@ export class Health {
         });
 
         Pmx.action("hold", (p, reply) => {
-            let
-                t = HOLD_PERIOD_M;
+            let t = HOLD_PERIOD_M;
             if (p) {
-                let
-                    n = parseInt(p);
-                if (!isNaN(n))
+                const n = Number.parseInt(p);
+                if (!Number.isNaN(n))
                     t = n;
             }
 
             this._holdTill = new Date();
             this._holdTill.setTime(this._holdTill.getTime() + t * 60000);
 
-            let
-                msg = `mail held for ${t} minutes, till ${this._holdTill.toISOString()}`;
+            const msg = `mail held for ${t} minutes, till ${this._holdTill.toISOString()}`;
             info(msg);
             reply(msg);
         });

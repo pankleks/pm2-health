@@ -1,6 +1,7 @@
 import * as Mailer from "nodemailer";
 import * as Fs from "fs";
 import { hostname } from "os";
+import { info } from "./Log";
 
 export interface ISmtpConfig {
     smtp: {
@@ -9,6 +10,7 @@ export interface ISmtpConfig {
         user?: string;
         password?: string;
         secure?: boolean;
+        from?: string;
         disabled: boolean;
     },
     mailTo: string;
@@ -38,21 +40,21 @@ export class Mail {
             this._template = Fs.readFileSync("Template.html", "utf8");
         }
         catch {
-            console.log(`Template.html not found`);
+            info(`Template.html not found`);
         }
     }
 
     async send(subject: string, body: string, attachements = []) {
         if (this._config.smtp.disabled === true)
             return;
-        let
-            temp = {
-                host: this._config.smtp.host,
-                port: this._config.smtp.port,
-                tls: { rejectUnauthorized: false },
-                secure: this._config.smtp.secure === true,
-                auth: null
-            };
+
+        const temp = {
+            host: this._config.smtp.host,
+            port: this._config.smtp.port,
+            tls: { rejectUnauthorized: false },
+            secure: this._config.smtp.secure === true,
+            auth: null
+        };
 
         if (this._config.smtp.user)
             temp.auth = {
@@ -60,12 +62,11 @@ export class Mail {
                 pass: this._config.smtp.password
             };
 
-        let
-            transport = Mailer.createTransport(temp);
+        const transport = Mailer.createTransport(temp);
 
         await transport.sendMail({
             to: this._config.mailTo,
-            from: this._config.smtp.user,
+            from: this._config.smtp.from || this._config.smtp.user, // use from, if not set -> user
             replyTo: this._config.replyTo,
             subject: `pm2-health: ${hostname()}, ${subject}`,
             html: this._template
