@@ -7,7 +7,7 @@ This [PM2](http://pm2.keymetrics.io/) module is:
 
 With rich config options you can fine-tune monitoring rules.
 
-## Installation
+## Installation & Upgrade
 
 `pm2 install pm2-health`
 
