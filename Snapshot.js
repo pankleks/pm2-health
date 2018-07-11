@@ -4,6 +4,7 @@ const Fs = require("fs");
 const os_1 = require("os");
 const planck_http_fetch_1 = require("planck-http-fetch");
 const Log_1 = require("./Log");
+const INACTIVE_AFTER_M = 5;
 class Snapshot {
     constructor(_config) {
         this._config = _config;
@@ -14,10 +15,13 @@ class Snapshot {
         if (!this._config.snapshot)
             this._config.snapshot = {};
         this._data.token = this._config.snapshot.token;
+        if (this._config.snapshot.inactiveAfterM == null)
+            this._config.snapshot.inactiveAfterM = INACTIVE_AFTER_M;
     }
     push(appId, app, key, history, v) {
         if (!this._data.app[appId])
-            this._data.app[appId] = { name: app, metric: {} };
+            this._data.app[appId] = { name: app, metric: {}, inactive: false };
+        this._data.app[appId].timeStamp = new Date().getTime();
         this._data.app[appId].metric[key] = { history, v };
     }
     last(appId, key) {
@@ -44,6 +48,13 @@ class Snapshot {
         }
         catch (ex) {
             Log_1.error(`snapshot push failed -> ${ex.message || ex}`);
+        }
+    }
+    inactivate() {
+        const t = new Date().getTime();
+        for (const id of Object.keys(this._data.app)) {
+            const dt = (t - this._data.app[id].timeStamp) / 60000;
+            this._data.app[id].inactive = dt > this._config.snapshot.inactiveAfterM;
         }
     }
 }

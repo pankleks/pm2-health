@@ -3,6 +3,8 @@ import { hostname } from "os";
 import { Fetch } from "planck-http-fetch";
 import { error } from "./Log";
 
+const INACTIVE_AFTER_M = 5;
+
 export interface IAuth {
     user: string;
     password: string;
@@ -14,6 +16,7 @@ export interface IShapshotConfig {
         auth?: IAuth,
         token?: string;
         disabled?: boolean;
+        inactiveAfterM?: number;
     }
 }
 
@@ -34,7 +37,9 @@ export interface IPayload {
                     history: boolean;
                     v: IValue;
                 };
-            }
+            };
+            timeStamp?: number;
+            inactive: boolean;
         }
     }
 }
@@ -50,12 +55,16 @@ export class Snapshot {
             this._config.snapshot = {};
 
         this._data.token = this._config.snapshot.token;
+
+        if (this._config.snapshot.inactiveAfterM == null)
+            this._config.snapshot.inactiveAfterM = INACTIVE_AFTER_M;
     }
 
     push(appId: number, app: string, key: string, history: boolean, v: IValue) {
         if (!this._data.app[appId])
-            this._data.app[appId] = { name: app, metric: {} };
+            this._data.app[appId] = { name: app, metric: {}, inactive: false };
 
+        this._data.app[appId].timeStamp = new Date().getTime();
         this._data.app[appId].metric[key] = { history, v };
     }
 
@@ -90,6 +99,16 @@ export class Snapshot {
         }
         catch (ex) {
             error(`snapshot push failed -> ${ex.message || ex}`);
+        }
+    }
+
+    inactivate() {
+        const t = new Date().getTime();
+
+        for (const id of Object.keys(this._data.app)) {
+            const dt = (t - this._data.app[<any>id].timeStamp) / 60000;
+
+            this._data.app[<any>id].inactive = dt > this._config.snapshot.inactiveAfterM;
         }
     }
 }

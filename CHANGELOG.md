@@ -1,3 +1,6 @@
+# 1.8.0
+- add app `inactive` flag for apps that don't sends signals anymore
+
 # 1.7.3
 - add `from` to `smtp` config (#16)
 

@@ -153,10 +153,10 @@ class Health {
         }
     }
     testProbes() {
-        let alerts = [];
+        const alerts = [];
         PM2.list((ex, list) => {
             stopIfEx(ex);
-            for (let e of list) {
+            for (const e of list) {
                 if (this.isAppExcluded(e.name))
                     continue;
                 let monit = e.pm2_env["axm_monitor"];
@@ -173,7 +173,7 @@ class Health {
                     if (e.pm2_env["node_version"])
                         monit["node"] = { value: e.pm2_env["node_version"], direct: true };
                 }
-                for (let key of Object.keys(monit)) {
+                for (const key of Object.keys(monit)) {
                     let probe = this._config.metric[key];
                     if (!probe)
                         probe = { noNotify: true, direct: monit[key].direct === true, noHistory: monit[key].direct === true };
@@ -192,12 +192,13 @@ class Health {
                     // test
                     if (probe.noNotify !== true && bad === true && (probe.ifChanged !== true || this._snapshot.last(e.pm_id, key) !== v))
                         alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${this._snapshot.last(e.pm_id, key)}</td><td>${probe.target}</td></tr>`);
-                    let data = { v };
+                    const data = { v };
                     if (bad) // safe space by not storing false
                         data.bad = true;
                     this._snapshot.push(e.pm_id, e.name, key, !probe.noHistory, data);
                 }
             }
+            this._snapshot.inactivate();
             this._snapshot.send();
             if (alerts.length > 0)
                 this.mail(`${alerts.length} alert(s)`, `
