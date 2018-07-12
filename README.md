@@ -172,7 +172,7 @@ To hold mail notification: `pm2 trigger pm2-health hold 30`
 
 > Notifications will restart automatically after 30 minutes.
 
-To unhold immediatelly: `pm2 trigger pm2-health unhold`
+To unhold immediatelly: `pm2 trigger pm2-health unheld`
 
 > All monitoring processes continues, just mail notification is held
 

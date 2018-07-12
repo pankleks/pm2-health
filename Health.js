@@ -114,7 +114,7 @@ class Health {
             Log_1.info(msg);
             reply(msg);
         });
-        Pmx.action("unhold", (reply) => {
+        Pmx.action("unheld", (reply) => {
             this._holdTill = null;
             reply(`mail unheld`);
         });
