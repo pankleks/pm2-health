@@ -53,8 +53,9 @@ class Snapshot {
     inactivate() {
         const t = new Date().getTime();
         for (const id of Object.keys(this._data.app)) {
-            const dt = (t - this._data.app[id].timeStamp) / 60000;
-            this._data.app[id].inactive = dt > this._config.snapshot.inactiveAfterM;
+            const app = this._data.app[id], dt = (t - app.timeStamp) / 60000;
+            console.log(`id: ${id}, app: ${app.name}, dt: ${dt} minutes`);
+            app.inactive = dt > this._config.snapshot.inactiveAfterM;
         }
     }
 }

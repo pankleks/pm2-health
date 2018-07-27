@@ -106,9 +106,13 @@ export class Snapshot {
         const t = new Date().getTime();
 
         for (const id of Object.keys(this._data.app)) {
-            const dt = (t - this._data.app[<any>id].timeStamp) / 60000;
+            const
+                app = this._data.app[<any>id],
+                dt = (t - app.timeStamp) / 60000;
 
-            this._data.app[<any>id].inactive = dt > this._config.snapshot.inactiveAfterM;
+            console.log(`id: ${id}, app: ${app.name}, dt: ${dt} minutes`);
+
+            app.inactive = dt > this._config.snapshot.inactiveAfterM;
         }
     }
 }
