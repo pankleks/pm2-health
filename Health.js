@@ -135,7 +135,8 @@ class Health {
         Pmx.action("debug", reply => {
             PM2.list((ex, list) => {
                 stopIfEx(ex);
-                Fs.writeFileSync(`./pm2-health-debug.json`, JSON.stringify(list), "utf8");
+                Fs.writeFileSync("./pm2-health-debug.json", JSON.stringify(list), "utf8");
+                Fs.writeFileSync("./pm2-health-config.json", JSON.stringify(this._config), "utf8");
                 reply(`dumping`);
             });
         });
