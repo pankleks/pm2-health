@@ -44,7 +44,7 @@ export class Mail {
         }
     }
 
-    async send(subject: string, body: string, important = false, attachements = []) {
+    async send(subject: string, body: string, priority?: "high" | "low", attachements = []) {
         if (this._config.smtp.disabled === true)
             return;
 
@@ -62,7 +62,12 @@ export class Mail {
                 pass: this._config.smtp.password
             };
 
-        const transport = Mailer.createTransport(temp);
+        const
+            transport = Mailer.createTransport(temp),
+            headers = {};
+
+        if (priority)
+            headers["importance"] = priority;
 
         await transport.sendMail({
             to: this._config.mailTo,
@@ -72,7 +77,8 @@ export class Mail {
             html: this._template
                 .replace(/<!--\s*body\s*-->/, body)
                 .replace(/<!--\s*timeStamp\s*-->/, new Date().toISOString()),
-            attachments: attachements
+            attachments: attachements,
+            headers
         });
     }
 }

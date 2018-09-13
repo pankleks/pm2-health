@@ -1,3 +1,7 @@
+# 1.8.9
+- add important flag to some of the mails
+- minnor fixes
+
 # 1.8.0
 - add app `inactive` flag for apps that don't sends signals anymore
 

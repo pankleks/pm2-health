@@ -139,7 +139,7 @@ export class Health {
                         <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
                         <p>Event: <b>${data.event}</b></p>
                         <pre>${JSON.stringify(data, undefined, 4)}</pre>`,
-                        true,
+                        "high",
                         LOGS.filter(e => this._config.addLogs === true && data.process[e]).map(e => ({ filename: basename(data.process[e]), path: data.process[e] })));
                 });
 
@@ -153,7 +153,7 @@ export class Health {
                             `
                             <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>                            
                             <pre>${JSON.stringify(data.data, undefined, 4)}</pre>`,
-                            true);
+                            "high");
                     });
 
                 if (this._config.messages)
@@ -226,14 +226,14 @@ export class Health {
         });
     }
 
-    private async mail(subject: string, body: string, important = false, attachements = []) {
+    private async mail(subject: string, body: string, priority?: "high" | "low", attachements = []) {
         let
             t = new Date();
         if (this._holdTill != null && t < this._holdTill)
             return; // skip
 
         try {
-            await this._mail.send(subject, body, important, attachements);
+            await this._mail.send(subject, body, priority, attachements);
             info(`mail [${subject}] sent`);
         }
         catch (ex) {
@@ -317,7 +317,7 @@ export class Health {
                         </tr>
                         ${alerts.join("")}
                     </table>`,
-                    true);
+                    "high");
 
             setTimeout(
                 () => { this.testProbes(); },

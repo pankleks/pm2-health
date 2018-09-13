@@ -27,7 +27,7 @@ class Mail {
             Log_1.info(`Template.html not found`);
         }
     }
-    async send(subject, body, important = false, attachements = []) {
+    async send(subject, body, priority, attachements = []) {
         if (this._config.smtp.disabled === true)
             return;
         const temp = {
@@ -42,7 +42,9 @@ class Mail {
                 user: this._config.smtp.user,
                 pass: this._config.smtp.password
             };
-        const transport = Mailer.createTransport(temp);
+        const transport = Mailer.createTransport(temp), headers = {};
+        if (priority)
+            headers["importance"] = priority;
         await transport.sendMail({
             to: this._config.mailTo,
             from: this._config.smtp.from || this._config.smtp.user,
@@ -51,7 +53,8 @@ class Mail {
             html: this._template
                 .replace(/<!--\s*body\s*-->/, body)
                 .replace(/<!--\s*timeStamp\s*-->/, new Date().toISOString()),
-            attachments: attachements
+            attachments: attachements,
+            headers
         });
     }
 }

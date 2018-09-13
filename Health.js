@@ -77,7 +77,7 @@ class Health {
                     this.mail(`${data.process.name}:${data.process.pm_id} - ${data.event}`, `
                         <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
                         <p>Event: <b>${data.event}</b></p>
-                        <pre>${JSON.stringify(data, undefined, 4)}</pre>`, true, LOGS.filter(e => this._config.addLogs === true && data.process[e]).map(e => ({ filename: path_1.basename(data.process[e]), path: data.process[e] })));
+                        <pre>${JSON.stringify(data, undefined, 4)}</pre>`, "high", LOGS.filter(e => this._config.addLogs === true && data.process[e]).map(e => ({ filename: path_1.basename(data.process[e]), path: data.process[e] })));
                 });
                 if (this._config.exceptions)
                     bus.on("process:exception", (data) => {
@@ -85,7 +85,7 @@ class Health {
                             return;
                         this.mail(`${data.process.name}:${data.process.pm_id} - exception`, `
                             <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>                            
-                            <pre>${JSON.stringify(data.data, undefined, 4)}</pre>`, true);
+                            <pre>${JSON.stringify(data.data, undefined, 4)}</pre>`, "high");
                     });
                 if (this._config.messages)
                     bus.on("process:msg", (data) => {
@@ -141,12 +141,12 @@ class Health {
             });
         });
     }
-    async mail(subject, body, important = false, attachements = []) {
+    async mail(subject, body, priority, attachements = []) {
         let t = new Date();
         if (this._holdTill != null && t < this._holdTill)
             return; // skip
         try {
-            await this._mail.send(subject, body, important, attachements);
+            await this._mail.send(subject, body, priority, attachements);
             Log_1.info(`mail [${subject}] sent`);
         }
         catch (ex) {
@@ -208,7 +208,7 @@ class Health {
                             <th>App</th><th>Metric</th><th>Value</th><th>Prev. Value</th><th>Target</th>
                         </tr>
                         ${alerts.join("")}
-                    </table>`, true);
+                    </table>`, "high");
             setTimeout(() => { this.testProbes(); }, 1000 * this._config.metricIntervalS);
         });
     }
