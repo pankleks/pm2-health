@@ -12,12 +12,14 @@ const
     HOLD_PERIOD_M = 30,
     LOGS = ["pm_err_log_path", "pm_out_log_path"],
     OP = {
-        "<": (a, b) => a < b,
-        ">": (a, b) => a > b,
-        "=": (a, b) => a === b,
-        "<=": (a, b) => a <= b,
-        ">=": (a, b) => a >= b,
-        "!=": (a, b) => a != b
+        "<": (a, b, t) => a < b && Math.abs(a - b) > t,
+        ">": (a, b, t) => a > b && Math.abs(a - b) > t,
+        "=": (a, b, t) => a === b,
+        "~": (a, b, t) => Math.abs(a - b) > t,
+        "<=": (a, b, t) => a <= b,
+        ">=": (a, b, t) => a >= b,
+        "!=": (a, b, t) => a !== b,
+        "!~": (a, b, t) => Math.abs(a - b) > t
     },
     CONFIG_KEYS = ["events", "metric", "exceptions", "messages", "messageExcludeExps", "appsExcluded", "metricIntervalS", "addLogs"];
 
@@ -32,6 +34,7 @@ interface IMonitConfig {
             noNotify: boolean;
             exclude?: boolean;
             direct?: boolean;
+            tolerance?: number;
         }
     },
     exceptions: boolean;
@@ -290,7 +293,7 @@ export class Health {
                     }
 
                     if (probe.op && probe.op in OP && probe.target != null)
-                        bad = OP[probe.op](v, probe.target);
+                        bad = OP[probe.op](v, probe.target, probe.tolerance || 0);
 
                     // test
                     if (probe.noNotify !== true && bad === true && (probe.ifChanged !== true || this._snapshot.last(app.pm_id, key) !== v))

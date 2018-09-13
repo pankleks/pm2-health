@@ -9,12 +9,14 @@ const Snapshot_1 = require("./Snapshot");
 const planck_http_fetch_1 = require("planck-http-fetch");
 const Log_1 = require("./Log");
 const MERTIC_INTERVAL_S = 60, HOLD_PERIOD_M = 30, LOGS = ["pm_err_log_path", "pm_out_log_path"], OP = {
-    "<": (a, b) => a < b,
-    ">": (a, b) => a > b,
-    "=": (a, b) => a === b,
-    "<=": (a, b) => a <= b,
-    ">=": (a, b) => a >= b,
-    "!=": (a, b) => a != b
+    "<": (a, b, t) => a < b && Math.abs(a - b) > t,
+    ">": (a, b, t) => a > b && Math.abs(a - b) > t,
+    "=": (a, b, t) => a === b,
+    "~": (a, b, t) => Math.abs(a - b) > t,
+    "<=": (a, b, t) => a <= b,
+    ">=": (a, b, t) => a >= b,
+    "!=": (a, b, t) => a !== b,
+    "!~": (a, b, t) => Math.abs(a - b) > t
 }, CONFIG_KEYS = ["events", "metric", "exceptions", "messages", "messageExcludeExps", "appsExcluded", "metricIntervalS", "addLogs"];
 class Health {
     constructor(_config) {
@@ -189,7 +191,7 @@ class Health {
                         }
                     }
                     if (probe.op && probe.op in OP && probe.target != null)
-                        bad = OP[probe.op](v, probe.target);
+                        bad = OP[probe.op](v, probe.target, probe.tolerance || 0);
                     // test
                     if (probe.noNotify !== true && bad === true && (probe.ifChanged !== true || this._snapshot.last(app.pm_id, key) !== v))
                         alerts.push(`<tr><td>${app.name}:${app.pm_id}</td><td>${key}</td><td>${v}</td><td>${this._snapshot.last(app.pm_id, key)}</td><td>${probe.target}</td></tr>`);
