@@ -96,6 +96,8 @@ To configure rules of alerting, setup `metric` section in module config file.
 
 * `exclude` - if `true`, metric will be complettely excluded from monitoring (optional)
 
+* `direct` - if `true`, metric value won't be converted to number (optional)
+
 By default, `cpu` and `memory` metrics are added.
 
 > Learn how to define PMX metrics in your apps here: http://pm2.keymetrics.io/docs/usage/process-metrics/
