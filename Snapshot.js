@@ -31,7 +31,7 @@ class Snapshot {
     }
     dump() {
         this._data.timeStamp = new Date().getTime();
-        Fs.writeFile(`./History_${new Date().toISOString()}.json`, JSON.stringify(this._data), (ex) => {
+        Fs.writeFile(`History_${new Date().toISOString()}.json`, JSON.stringify(this._data), (ex) => {
             if (ex)
                 Log_1.error(`can't dump history -> ${ex.message || ex}`);
         });
@@ -54,8 +54,9 @@ class Snapshot {
         const t = new Date().getTime();
         for (const id of Object.keys(this._data.app)) {
             const app = this._data.app[id], dt = (t - app.timeStamp) / 60000;
-            console.log(`id: ${id}, app: ${app.name}, dt: ${dt} minutes`);
             app.inactive = dt > this._config.snapshot.inactiveAfterM;
+            if (app.inactive)
+                Log_1.info(`app [${app.name}] is inactive`);
         }
     }
 }

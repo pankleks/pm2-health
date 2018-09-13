@@ -1,7 +1,7 @@
 import * as Fs from "fs";
 import { hostname } from "os";
 import { Fetch } from "planck-http-fetch";
-import { error } from "./Log";
+import { error, info } from "./Log";
 
 const INACTIVE_AFTER_M = 5;
 
@@ -77,7 +77,7 @@ export class Snapshot {
 
     dump() {
         this._data.timeStamp = new Date().getTime();
-        Fs.writeFile(`./History_${new Date().toISOString()}.json`, JSON.stringify(this._data), (ex) => {
+        Fs.writeFile(`History_${new Date().toISOString()}.json`, JSON.stringify(this._data), (ex) => {
             if (ex)
                 error(`can't dump history -> ${ex.message || ex}`);
         });
@@ -110,9 +110,9 @@ export class Snapshot {
                 app = this._data.app[<any>id],
                 dt = (t - app.timeStamp) / 60000;
 
-            console.log(`id: ${id}, app: ${app.name}, dt: ${dt} minutes`);
-
             app.inactive = dt > this._config.snapshot.inactiveAfterM;
+            if (app.inactive)
+                info(`app [${app.name}] is inactive`);
         }
     }
 }

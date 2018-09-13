@@ -135,8 +135,8 @@ class Health {
         Pmx.action("debug", reply => {
             PM2.list((ex, list) => {
                 stopIfEx(ex);
-                Fs.writeFileSync("./pm2-health-debug.json", JSON.stringify(list), "utf8");
-                Fs.writeFileSync("./pm2-health-config.json", JSON.stringify(this._config), "utf8");
+                Fs.writeFileSync("pm2-health-debug.json", JSON.stringify(list));
+                Fs.writeFileSync("pm2-health-config.json", JSON.stringify(this._config));
                 reply(`dumping`);
             });
         });
@@ -157,22 +157,22 @@ class Health {
         const alerts = [];
         PM2.list((ex, list) => {
             stopIfEx(ex);
-            for (const e of list) {
-                if (this.isAppExcluded(e.name))
+            for (const app of list) {
+                if (this.isAppExcluded(app.name))
                     continue;
-                let monit = e.pm2_env["axm_monitor"];
+                let monit = app.pm2_env["axm_monitor"];
                 if (!monit)
                     monit = {};
                 // add memory + cpu metrics
-                if (e.monit) {
-                    monit["memory"] = { value: e.monit.memory / 1048576 };
-                    monit["cpu"] = { value: e.monit.cpu };
+                if (app.monit) {
+                    monit["memory"] = { value: app.monit.memory / 1048576 };
+                    monit["cpu"] = { value: app.monit.cpu };
                 }
-                if (e.pm2_env) {
-                    if (e.pm2_env["_pm2_version"])
-                        monit["pm2"] = { value: e.pm2_env["_pm2_version"], direct: true };
-                    if (e.pm2_env["node_version"])
-                        monit["node"] = { value: e.pm2_env["node_version"], direct: true };
+                if (app.pm2_env) {
+                    if (app.pm2_env["_pm2_version"])
+                        monit["pm2"] = { value: app.pm2_env["_pm2_version"], direct: true };
+                    if (app.pm2_env["node_version"])
+                        monit["node"] = { value: app.pm2_env["node_version"], direct: true };
                 }
                 for (const key of Object.keys(monit)) {
                     let probe = this._config.metric[key];
@@ -184,19 +184,19 @@ class Health {
                     if (!probe.direct) {
                         v = Number.parseFloat(v);
                         if (Number.isNaN(v)) {
-                            console.error(`monit [${key}] is not a number`);
+                            Log_1.error(`monit [${app.name}.${key}] -> [${monit[key].value}] is not a number`);
                             continue;
                         }
                     }
                     if (probe.op && probe.op in OP && probe.target != null)
                         bad = OP[probe.op](v, probe.target);
                     // test
-                    if (probe.noNotify !== true && bad === true && (probe.ifChanged !== true || this._snapshot.last(e.pm_id, key) !== v))
-                        alerts.push(`<tr><td>${e.name}:${e.pm_id}</td><td>${key}</td><td>${v}</td><td>${this._snapshot.last(e.pm_id, key)}</td><td>${probe.target}</td></tr>`);
+                    if (probe.noNotify !== true && bad === true && (probe.ifChanged !== true || this._snapshot.last(app.pm_id, key) !== v))
+                        alerts.push(`<tr><td>${app.name}:${app.pm_id}</td><td>${key}</td><td>${v}</td><td>${this._snapshot.last(app.pm_id, key)}</td><td>${probe.target}</td></tr>`);
                     const data = { v };
                     if (bad) // safe space by not storing false
                         data.bad = true;
-                    this._snapshot.push(e.pm_id, e.name, key, !probe.noHistory, data);
+                    this._snapshot.push(app.pm_id, app.name, key, !probe.noHistory, data);
                 }
             }
             this._snapshot.inactivate();
