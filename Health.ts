@@ -139,6 +139,7 @@ export class Health {
                         <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
                         <p>Event: <b>${data.event}</b></p>
                         <pre>${JSON.stringify(data, undefined, 4)}</pre>`,
+                        true,
                         LOGS.filter(e => this._config.addLogs === true && data.process[e]).map(e => ({ filename: basename(data.process[e]), path: data.process[e] })));
                 });
 
@@ -151,7 +152,8 @@ export class Health {
                             `${data.process.name}:${data.process.pm_id} - exception`,
                             `
                             <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>                            
-                            <pre>${JSON.stringify(data.data, undefined, 4)}</pre>`);
+                            <pre>${JSON.stringify(data.data, undefined, 4)}</pre>`,
+                            true);
                     });
 
                 if (this._config.messages)
@@ -224,14 +226,14 @@ export class Health {
         });
     }
 
-    private async mail(subject: string, body: string, attachements = []) {
+    private async mail(subject: string, body: string, important = false, attachements = []) {
         let
             t = new Date();
         if (this._holdTill != null && t < this._holdTill)
             return; // skip
 
         try {
-            await this._mail.send(subject, body, attachements);
+            await this._mail.send(subject, body, important, attachements);
             info(`mail [${subject}] sent`);
         }
         catch (ex) {
@@ -242,7 +244,7 @@ export class Health {
     private testProbes() {
         const alerts = [];
 
-        PM2.list((ex, list) => {
+        PM2.list(async (ex, list) => {
             stopIfEx(ex);
 
             for (const app of list) {
@@ -303,7 +305,7 @@ export class Health {
             }
 
             this._snapshot.inactivate();
-            this._snapshot.send();
+            await this._snapshot.send();
 
             if (alerts.length > 0)
                 this.mail(
@@ -314,7 +316,8 @@ export class Health {
                             <th>App</th><th>Metric</th><th>Value</th><th>Prev. Value</th><th>Target</th>
                         </tr>
                         ${alerts.join("")}
-                    </table>`);
+                    </table>`,
+                    true);
 
             setTimeout(
                 () => { this.testProbes(); },

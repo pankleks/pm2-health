@@ -27,7 +27,7 @@ class Mail {
             Log_1.info(`Template.html not found`);
         }
     }
-    async send(subject, body, attachements = []) {
+    async send(subject, body, important = false, attachements = []) {
         if (this._config.smtp.disabled === true)
             return;
         const temp = {

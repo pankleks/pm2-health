@@ -44,7 +44,7 @@ export class Mail {
         }
     }
 
-    async send(subject: string, body: string, attachements = []) {
+    async send(subject: string, body: string, important = false, attachements = []) {
         if (this._config.smtp.disabled === true)
             return;
 
