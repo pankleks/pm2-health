@@ -22,8 +22,10 @@ class Health {
     constructor(_config) {
         this._config = _config;
         this._holdTill = null;
-        if (this._config.metricIntervalS == null)
+        if (this._config.metricIntervalS == null || this._config.metricIntervalS < MERTIC_INTERVAL_S) {
+            Log_1.info(`setting default metric check interval ${MERTIC_INTERVAL_S} s.`);
             this._config.metricIntervalS = MERTIC_INTERVAL_S;
+        }
         if (!this._config.metric)
             this._config.metric = {};
         this._mail = new Mail_1.Mail(_config);

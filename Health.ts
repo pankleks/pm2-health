@@ -59,8 +59,10 @@ export class Health {
     _holdTill: Date = null;
 
     constructor(private _config: IConfig) {
-        if (this._config.metricIntervalS == null)
+        if (this._config.metricIntervalS == null || this._config.metricIntervalS < MERTIC_INTERVAL_S) {
+            info(`setting default metric check interval ${MERTIC_INTERVAL_S} s.`);
             this._config.metricIntervalS = MERTIC_INTERVAL_S;
+        }
 
         if (!this._config.metric)
             this._config.metric = {};
