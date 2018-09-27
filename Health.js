@@ -96,6 +96,10 @@ class Health {
                     bus.on("process:msg", (data) => {
                         if (this.isAppExcluded(data.process.name))
                             return;
+                        if (data.data === "alive") {
+                            this.aliveReset(data.process, this._config.aliveTimeoutS);
+                            return;
+                        }
                         const json = JSON.stringify(data.data, undefined, 4);
                         if (this._messageExcludeExps.some(e => e.test(json)))
                             return; // exclude
@@ -103,15 +107,6 @@ class Health {
                             <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
                             <pre>${json}</pre>`);
                     });
-                // alive
-                if (this._config.aliveTimeoutS > 0) {
-                    const timeouts = new Map();
-                    bus.on("process:alive", (data) => {
-                        if (this.isAppExcluded(data.process.name))
-                            return;
-                        this.aliveReset(data.process, this._config.aliveTimeoutS);
-                    });
-                }
             });
             this.testProbes();
         });
@@ -158,6 +153,7 @@ class Health {
     aliveReset(process, timeoutS, count = 1) {
         clearTimeout(this._timeouts.get(process.name));
         this._timeouts.set(process.name, setTimeout(() => {
+            Log_1.info(`death ${process.name}:${process.pm_id}, count ${count}`);
             this.mail(`${process.name}:${process.pm_id} - is death!`, `
                     <p>App: <b>${process.name}:${process.pm_id}</b></p>
                     <p>This is <b>${count}/${ALIVE_MAX_CONSECUTIVE_TESTS}</b> consecutive notice.</p>`, "high");

@@ -169,6 +169,11 @@ export class Health {
                         if (this.isAppExcluded(data.process.name))
                             return;
 
+                        if (data.data === "alive") {
+                            this.aliveReset(data.process, this._config.aliveTimeoutS);
+                            return;
+                        }
+
                         const json = JSON.stringify(data.data, undefined, 4);
 
                         if (this._messageExcludeExps.some(e => e.test(json)))
@@ -180,18 +185,6 @@ export class Health {
                             <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
                             <pre>${json}</pre>`);
                     });
-
-                // alive
-                if (this._config.aliveTimeoutS > 0) {
-                    const timeouts = new Map<string, NodeJS.Timer>();
-
-                    bus.on("process:alive", (data) => {
-                        if (this.isAppExcluded(data.process.name))
-                            return;
-
-                        this.aliveReset(data.process, this._config.aliveTimeoutS);
-                    });
-                }
             });
 
             this.testProbes();
@@ -254,6 +247,8 @@ export class Health {
         this._timeouts.set(
             process.name,
             setTimeout(() => {
+                info(`death ${process.name}:${process.pm_id}, count ${count}`);
+
                 this.mail(
                     `${process.name}:${process.pm_id} - is death!`,
                     `
