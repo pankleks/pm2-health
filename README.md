@@ -55,6 +55,8 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 * `metricIntervalS` - how often PMX metrics will be tested in seconds (optional). If not set, 60 seconds is used
 
+* `aliveTimeoutS` - alive watchdog timeout interal in seconds. If not set watchdog function is off. See [Process alive watchdog](#process-alive-watchdog)
+
 * `addLogs` - if `true` app logs will be added as mail attachement (optional)
 
 * `appsExcluded` - list of app names to exclude from monitoring (optional)
@@ -144,6 +146,22 @@ Set config to:
 ]
 ```
 > Remember to escape regex string to JSON string
+
+## Process alive watchdog
+
+Alive watchdog (added in 1.9.0) can observe alive messages from processes.
+
+To use functionallity your process has to send periodically `process:alive` signal as such:
+```javascript
+process.send({ type: "process:alive" });
+```
+
+In addition config parameter `aliveTimeoutS` must be added. If alive message won't be received within `aliveTimeoutS` (seconds), alert will be send.
+
+> `aliveTimeoutS` must be lower than interval of sending `process:alive` signal.
+
+After first alert, following test is done every 10 minues for 6 consecutive times, after wich alerting stops, assuming process is permanetly closed.
+
 
 ## Web config
 

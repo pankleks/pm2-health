@@ -8,7 +8,7 @@ const Mail_1 = require("./Mail");
 const Snapshot_1 = require("./Snapshot");
 const planck_http_fetch_1 = require("planck-http-fetch");
 const Log_1 = require("./Log");
-const MERTIC_INTERVAL_S = 60, HOLD_PERIOD_M = 30, LOGS = ["pm_err_log_path", "pm_out_log_path"], OP = {
+const MERTIC_INTERVAL_S = 60, HOLD_PERIOD_M = 30, ALIVE_MAX_CONSECUTIVE_TESTS = 6, ALIVE_CONSECUTIVE_TIMEOUT_S = 600, LOGS = ["pm_err_log_path", "pm_out_log_path"], OP = {
     "<": (a, b, t) => a < b && Math.abs(a - b) > t,
     ">": (a, b, t) => a > b && Math.abs(a - b) > t,
     "=": (a, b, t) => a === b,
@@ -17,11 +17,12 @@ const MERTIC_INTERVAL_S = 60, HOLD_PERIOD_M = 30, LOGS = ["pm_err_log_path", "pm
     ">=": (a, b, t) => a >= b,
     "!=": (a, b, t) => a !== b,
     "!~": (a, b, t) => Math.abs(a - b) > t
-}, CONFIG_KEYS = ["events", "metric", "exceptions", "messages", "messageExcludeExps", "appsExcluded", "metricIntervalS", "addLogs"];
+}, CONFIG_KEYS = ["events", "metric", "exceptions", "messages", "messageExcludeExps", "appsExcluded", "metricIntervalS", "addLogs", "aliveTimeoutS"];
 class Health {
     constructor(_config) {
         this._config = _config;
         this._holdTill = null;
+        this._timeouts = new Map();
         if (this._config.metricIntervalS == null || this._config.metricIntervalS < MERTIC_INTERVAL_S) {
             Log_1.info(`setting default metric check interval ${MERTIC_INTERVAL_S} s.`);
             this._config.metricIntervalS = MERTIC_INTERVAL_S;
@@ -102,6 +103,15 @@ class Health {
                             <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
                             <pre>${json}</pre>`);
                     });
+                // alive
+                if (this._config.aliveTimeoutS > 0) {
+                    const timeouts = new Map();
+                    bus.on("process:alive", (data) => {
+                        if (this.isAppExcluded(data.process.name))
+                            return;
+                        this.aliveReset(data.process, this._config.aliveTimeoutS);
+                    });
+                }
             });
             this.testProbes();
         });
@@ -144,6 +154,16 @@ class Health {
                 reply(`dumping`);
             });
         });
+    }
+    aliveReset(process, timeoutS, count = 1) {
+        clearTimeout(this._timeouts.get(process.name));
+        this._timeouts.set(process.name, setTimeout(() => {
+            this.mail(`${process.name}:${process.pm_id} - is death!`, `
+                    <p>App: <b>${process.name}:${process.pm_id}</b></p>
+                    <p>This is <b>${count}/${ALIVE_MAX_CONSECUTIVE_TESTS}</b> consecutive notice.</p>`, "high");
+            if (count <= ALIVE_MAX_CONSECUTIVE_TESTS)
+                this.aliveReset(process, ALIVE_CONSECUTIVE_TIMEOUT_S, count + 1);
+        }, timeoutS * 1000));
     }
     async mail(subject, body, priority, attachements = []) {
         let t = new Date();
