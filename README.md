@@ -151,9 +151,12 @@ Set config to:
 
 Alive watchdog (added in 1.9.0) can observe alive messages from processes.
 
-To use functionallity your process has to send periodically `process:alive` signal as such:
+To use functionallity your process has to send periodically `process:msg` signal as such:
 ```javascript
-process.send({ type: "process:alive" });
+process.send({
+    type: "process:msg",    
+    data: "alive"
+});
 ```
 
 In addition config parameter `aliveTimeoutS` must be added. If alive message won't be received within `aliveTimeoutS` (seconds), alert will be send.

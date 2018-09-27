@@ -256,14 +256,13 @@ export class Health {
                     <p>This is <b>${count}/${ALIVE_MAX_CONSECUTIVE_TESTS}</b> consecutive notice.</p>`,
                     "high");
 
-                if (count <= ALIVE_MAX_CONSECUTIVE_TESTS)
+                if (count < ALIVE_MAX_CONSECUTIVE_TESTS)
                     this.aliveReset(process, ALIVE_CONSECUTIVE_TIMEOUT_S, count + 1);
             }, timeoutS * 1000));
     }
 
     private async mail(subject: string, body: string, priority?: "high" | "low", attachements = []) {
-        let
-            t = new Date();
+        const t = new Date();
         if (this._holdTill != null && t < this._holdTill)
             return; // skip
 

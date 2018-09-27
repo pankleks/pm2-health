@@ -157,12 +157,12 @@ class Health {
             this.mail(`${process.name}:${process.pm_id} - is death!`, `
                     <p>App: <b>${process.name}:${process.pm_id}</b></p>
                     <p>This is <b>${count}/${ALIVE_MAX_CONSECUTIVE_TESTS}</b> consecutive notice.</p>`, "high");
-            if (count <= ALIVE_MAX_CONSECUTIVE_TESTS)
+            if (count < ALIVE_MAX_CONSECUTIVE_TESTS)
                 this.aliveReset(process, ALIVE_CONSECUTIVE_TIMEOUT_S, count + 1);
         }, timeoutS * 1000));
     }
     async mail(subject, body, priority, attachements = []) {
-        let t = new Date();
+        const t = new Date();
         if (this._holdTill != null && t < this._holdTill)
             return; // skip
         try {
