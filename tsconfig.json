@@ -2,6 +2,10 @@
     "compilerOptions": {
         "target": "es2017",
         "sourceMap": true,
-        "module": "commonjs"
+        "module": "commonjs",
+        "lib": [
+            "es2017",
+            "esnext.asynciterable"
+        ]
     }
 }
