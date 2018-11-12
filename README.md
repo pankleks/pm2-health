@@ -41,6 +41,8 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 * `replyTo` - reply to address (optional)
 
+* `slack` - Slack conf : channel and webhook are required to use this
+
 * `events` - list of events to monitor (optional). If not set, all events will be monitored. 
 
 > Manually triggered events will not send notification.
@@ -191,13 +193,13 @@ Url must return UTF-8 JSON with config properties.
 
 ## Hold notifications temporarily
 
-To hold mail notification: `pm2 trigger pm2-health hold 30`
+To hold mail/slack notification: `pm2 trigger pm2-health hold 30`
 
 > Notifications will restart automatically after 30 minutes.
 
 To unhold immediatelly: `pm2 trigger pm2-health unheld`
 
-> All monitoring processes continues, just mail notification is held
+> All monitoring processes continues, just mail/slack notification is held
 
 ## Mail template
 
@@ -212,6 +214,14 @@ Mail uses HTML format. To adjust template, you can edit [Template.html](./Templa
 ## Testing mail
 
 To send test mail: `pm2 trigger pm2-health mail`
+
+## Slack Messages
+
+Slack uses the incoming webhooks message builder.
+
+## Testing slack
+
+To send test slack message: `pm2 trigger pm2-health slack`
 
 ## Building
 

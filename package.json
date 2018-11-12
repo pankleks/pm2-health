@@ -43,6 +43,12 @@
     },
     "mailTo": "mail1,mail2",
     "replyTo": "",
+    "slack": {
+      "username": "pm2-health",
+      "channel": "events",
+      "webhook": "https://hooks.slack.com/services/your/incoming/webhook-url-here",
+      "disabled": false
+    },
     "events": [
       "exit"
     ],
