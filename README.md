@@ -219,6 +219,8 @@ To send test mail: `pm2 trigger pm2-health mail`
 
 Slack uses the incoming webhooks message builder.
 
+![slack-preview](./slackPreview.png)
+
 ## Testing slack
 
 To send test slack message: `pm2 trigger pm2-health slack`
