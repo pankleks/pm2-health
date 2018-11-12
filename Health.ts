@@ -3,6 +3,7 @@ import * as Pmx from "pmx";
 import * as Fs from "fs";
 import { basename } from "path";
 import { Mail, ISmtpConfig } from "./Mail";
+import { Slack, ISlackConfig, SlackAttachement } from './Slack';
 import { Snapshot, IShapshotConfig, IAuth } from "./Snapshot";
 import { Fetch } from "planck-http-fetch";
 import { info, error } from "./Log";
@@ -48,7 +49,7 @@ interface IMonitConfig {
     aliveTimeoutS: number;
 }
 
-interface IConfig extends IMonitConfig, ISmtpConfig, IShapshotConfig {
+interface IConfig extends IMonitConfig, ISmtpConfig, ISlackConfig, IShapshotConfig {
     webConfig: {
         url: string;
         auth?: IAuth;
@@ -58,6 +59,7 @@ interface IConfig extends IMonitConfig, ISmtpConfig, IShapshotConfig {
 
 export class Health {
     readonly _mail: Mail;
+    readonly _slack: Slack;
     readonly _snapshot: Snapshot;
     _holdTill: Date = null;
 
@@ -71,6 +73,7 @@ export class Health {
             this._config.metric = {};
 
         this._mail = new Mail(_config);
+        this._slack = new Slack(_config);
         this._snapshot = new Snapshot(this._config);
     }
 
@@ -218,6 +221,16 @@ export class Health {
             }
             catch (ex) {
                 reply(`mail failed: ${ex.message || ex}`);
+            }
+        });
+
+        Pmx.action("slack", async (reply) => {
+            try {
+                await this._slack.send("Test only", [{ title: "This is test only." }]);
+                reply(`slack sent`);
+            }
+            catch (ex) {
+                reply(`slack failed: ${ex.message || ex}`);
             }
         });
 
