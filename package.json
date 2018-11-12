@@ -9,6 +9,7 @@
   "author": "Krzysztof Heim",
   "license": "MIT",
   "dependencies": {
+    "@slack/client": "^4.8.0",
     "nodemailer": "^4.6.8",
     "planck-http-fetch": "^1.3.0",
     "pm2": "2.10.4"
