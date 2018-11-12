@@ -9,6 +9,13 @@ export interface ISlackConfig {
 	}
 }
 
+export interface SlackFormatOptions {
+	code?: boolean,
+	bold?: boolean,
+	italics?: boolean,
+	strikethrough?: boolean,
+}
+
 class Slack {
 	private _webhook: IncomingWebhook;
 
@@ -42,5 +49,22 @@ class Slack {
 		};
 
 		await this._webhook.send(paylaod);
+	}
+
+	/**
+	 * Format function for message building, default formatting is Bold
+	 */
+	static format(txt: string, {
+		code = false,
+		bold = false,
+		italics = false,
+		strikethrough = false,
+	}: SlackFormatOptions = { bold: true }
+	) {
+		if (code) txt = `\`${txt}\``;
+		if (bold) txt = `*${txt}*`;
+		if (italics) txt = `_${txt}_`;
+		if (strikethrough) txt = `~${txt}~`;
+		return txt;
 	}
 }
