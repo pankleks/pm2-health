@@ -204,14 +204,14 @@ export class Health {
             this._holdTill = new Date();
             this._holdTill.setTime(this._holdTill.getTime() + t * 60000);
 
-            const msg = `mail held for ${t} minutes, till ${this._holdTill.toISOString()}`;
+            const msg = `mail/slack held for ${t} minutes, till ${this._holdTill.toISOString()}`;
             info(msg);
             reply(msg);
         });
 
         Pmx.action("unheld", (reply) => {
             this._holdTill = null;
-            reply(`mail unheld`);
+            reply(`mail/slack unheld`);
         });
 
         Pmx.action("mail", async (reply) => {
@@ -274,10 +274,15 @@ export class Health {
             }, timeoutS * 1000));
     }
 
-    private async mail(subject: string, body: string, priority?: "high" | "low", attachements = []) {
+    private hold() {
         const t = new Date();
         if (this._holdTill != null && t < this._holdTill)
-            return; // skip
+            return true; //skip
+        return false;
+    }
+
+    private async mail(subject: string, body: string, priority?: "high" | "low", attachements = []) {
+        if (this.hold()) return;
 
         try {
             await this._mail.send(subject, body, priority, attachements);
@@ -285,6 +290,18 @@ export class Health {
         }
         catch (ex) {
             error(`mail failed -> ${ex.message || ex}`);
+        }
+    }
+
+    private async slack(subject: string, attachements: SlackAttachement[] = []) {
+        if (this.hold()) return;
+
+        try {
+            await this._slack.send(subject, attachements);
+            info(`slack [${subject}] sent`);
+        }
+        catch (ex) {
+            error(`slack failed -> ${ex.message || ex}`);
         }
     }
 
