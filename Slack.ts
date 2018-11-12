@@ -1,5 +1,7 @@
 import { IncomingWebhook, IncomingWebhookSendArguments, MessageAttachment } from '@slack/client';
 
+export type SlackAttachement = MessageAttachment;
+
 export interface ISlackConfig {
 	slack: {
 		username?: string;
@@ -16,7 +18,7 @@ export interface SlackFormatOptions {
 	strikethrough?: boolean,
 }
 
-class Slack {
+export class Slack {
 	private _webhook: IncomingWebhook;
 
 	constructor(private _config: ISlackConfig) {
@@ -37,7 +39,7 @@ class Slack {
 		this._webhook = new IncomingWebhook(this._config.slack.webhook);
 	}
 
-	async send(subject: string, attachments: MessageAttachment[] = []) {
+	async send(subject: string, attachments: SlackAttachement[] = []) {
 		if (this._config.slack.disabled === true)
 			return;
 		const paylaod: IncomingWebhookSendArguments = {
@@ -66,5 +68,14 @@ class Slack {
 		if (italics) txt = `_${txt}_`;
 		if (strikethrough) txt = `~${txt}~`;
 		return txt;
+	}
+
+	static formatUrl(url: string, text: string) {
+		return `<${url}|${text}>`;
+	};
+
+	static readonly COLORS: { readonly [key: string]: string } = {
+		"high": "danger",
+		"low": "warning",
 	}
 }
