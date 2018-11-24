@@ -49,7 +49,7 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 * `messages` - if `true` apps custom messages will be monitored (optional). See [Custom messages](#custom-messages)
 
-* `messageExcludeExps` - list of regular expressions used to exclude messages (optional). See [Filtering custom messages](#filtering-custom-messages)
+* `messageExcludeExps` - array of regular expressions used to exclude messages (optional). See [Filtering custom messages](#filtering-custom-messages)
 
 * `metric` - object describing PMX metrics to be monitored (optional). See [Metrics monitoring](#metrics-monitoring)
 
@@ -59,7 +59,9 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 * `addLogs` - if `true` app logs will be added as mail attachement (optional)
 
-* `appsExcluded` - list of app names to exclude from monitoring (optional)
+* `appsExcluded` - array of app names to exclude from monitoring (optional)
+
+* `appsIncluded` - array of app names to include, if set `appsExcluded` is ignored (optional)
 
 * `webConfig` - if set, some of the config settings can be downloaded from given url (optional). See [Web config](#web-config)
 

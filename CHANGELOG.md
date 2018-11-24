@@ -1,3 +1,6 @@
+# 1.9.5
+- add `appsIncluded` to config (#18)
+
 # 1.9.0
 - add alive functionallity
 

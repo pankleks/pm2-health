@@ -56,8 +56,14 @@ class Health {
         if (Array.isArray(this._config.messageExcludeExps))
             this._messageExcludeExps = this._config.messageExcludeExps.map(e => new RegExp(e));
     }
-    isAppExcluded(app) {
-        return app === "pm2-health" || (Array.isArray(this._config.appsExcluded) && this._config.appsExcluded.indexOf(app) !== -1);
+    isAppIncluded(app) {
+        if (app === "pm2-health")
+            return false;
+        if (Array.isArray(this._config.appsIncluded))
+            return this._config.appsIncluded.includes(app);
+        if (Array.isArray(this._config.appsExcluded))
+            return !this._config.appsExcluded.includes(app);
+        return false;
     }
     async go() {
         Log_1.info(`pm2-health is on`);
@@ -75,7 +81,7 @@ class Health {
             PM2.launchBus((ex, bus) => {
                 stopIfEx(ex);
                 bus.on("process:event", (data) => {
-                    if (data.manually || this.isAppExcluded(data.process.name))
+                    if (data.manually || !this.isAppIncluded(data.process.name))
                         return;
                     if (Array.isArray(this._config.events) && this._config.events.indexOf(data.event) === -1)
                         return;
@@ -86,7 +92,7 @@ class Health {
                 });
                 if (this._config.exceptions)
                     bus.on("process:exception", (data) => {
-                        if (this.isAppExcluded(data.process.name))
+                        if (!this.isAppIncluded(data.process.name))
                             return;
                         this.mail(`${data.process.name}:${data.process.pm_id} - exception`, `
                             <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>                            
@@ -94,7 +100,7 @@ class Health {
                     });
                 if (this._config.messages)
                     bus.on("process:msg", (data) => {
-                        if (this.isAppExcluded(data.process.name))
+                        if (!this.isAppIncluded(data.process.name))
                             return;
                         if (data.data === "alive") {
                             this.aliveReset(data.process, this._config.aliveTimeoutS);
@@ -178,7 +184,7 @@ class Health {
         PM2.list(async (ex, list) => {
             stopIfEx(ex);
             for (const app of list) {
-                if (this.isAppExcluded(app.name))
+                if (!this.isAppIncluded(app.name))
                     continue;
                 let monit = app.pm2_env["axm_monitor"];
                 if (!monit)
