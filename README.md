@@ -43,6 +43,8 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 * `events` - list of events to monitor (optional). If not set, all events will be monitored. 
 
+* `eventExcludeExps` - array of regular expressions used to exclude events (optional).
+
 > Manually triggered events will not send notification.
 
 * `exceptions` - if `true` apps exceptions will be monitored (optional)
