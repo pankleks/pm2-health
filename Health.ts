@@ -23,7 +23,7 @@ const
         "!=": (a, b, t) => a !== b,
         "!~": (a, b, t) => Math.abs(a - b) > t
     },
-    CONFIG_KEYS = ["events", "metric", "exceptions", "messages", "messageExcludeExps", "appsExcluded", "metricIntervalS", "addLogs", "aliveTimeoutS"];
+    CONFIG_KEYS = ["events", "metric", "exceptions", "messages", "messageExcludeExps", "eventExcludeExps", "appsExcluded", "metricIntervalS", "addLogs", "aliveTimeoutS"];
 
 interface IMonitConfig {
     events: string[];
@@ -42,6 +42,7 @@ interface IMonitConfig {
     exceptions: boolean;
     messages: boolean;
     messageExcludeExps: string;
+    eventExcludeExps: string;
     appsIncluded: string[];
     appsExcluded: string[];
     metricIntervalS: number;
@@ -101,11 +102,15 @@ export class Health {
     }
 
     _messageExcludeExps: RegExp[];
+    _eventExcludeExps: RegExp[];
 
     configChanged() {
         this._messageExcludeExps = [];
         if (Array.isArray(this._config.messageExcludeExps))
             this._messageExcludeExps = this._config.messageExcludeExps.map(e => new RegExp(e));
+        this._eventExcludeExps = [];
+        if (Array.isArray(this._config.eventExcludeExps))
+            this._eventExcludeExps = this._config.eventExcludeExps.map(e => new RegExp(e));
     }
 
     isAppIncluded(app: string) {
@@ -150,6 +155,11 @@ export class Health {
 
                     if (Array.isArray(this._config.events) && this._config.events.indexOf(data.event) === -1)
                         return;
+                    
+                    const json = JSON.stringify(data.data, undefined, 4);
+
+                    if (this._eventExcludeExps.some(e => e.test(json)))
+                        return; // exclude
 
                     this.mail(
                         `${data.process.name}:${data.process.pm_id} - ${data.event}`,
