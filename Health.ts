@@ -156,7 +156,7 @@ export class Health {
                     if (Array.isArray(this._config.events) && this._config.events.indexOf(data.event) === -1)
                         return;
                     
-                    const json = JSON.stringify(data.data, undefined, 4);
+                    const json = JSON.stringify(data, undefined, 4);
 
                     if (this._eventExcludeExps.some(e => e.test(json)))
                         return; // exclude
