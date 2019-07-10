@@ -45,6 +45,7 @@
     "events": [
       "exit"
     ],
+    "eventExcludeExps": [],
     "exceptions": true,
     "messages": true,
     "messageExcludeExps": [],
