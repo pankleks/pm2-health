@@ -1,3 +1,7 @@
+# 1.10.0
+- updated dependencies to newest
+- added license file (#23)
+
 # 1.9.5
 - add `appsIncluded` to config (#18)
 

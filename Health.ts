@@ -1,5 +1,5 @@
 import * as PM2 from "pm2";
-import * as Pmx from "pmx";
+import * as Pmx from "@pm2/io";
 import * as Fs from "fs";
 import { basename } from "path";
 import { Mail, ISmtpConfig } from "./Mail";

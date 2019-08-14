@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const Pmx = require("pmx");
+const Pmx = require("@pm2/io");
 const Health_1 = require("./Health");
 Pmx.initModule({
     type: "generic",

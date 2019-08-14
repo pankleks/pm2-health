@@ -1,4 +1,4 @@
-import * as Pmx from "pmx";
+import * as Pmx from "@pm2/io";
 import { stopIfEx, Health } from "./Health";
 
 Pmx.initModule({
