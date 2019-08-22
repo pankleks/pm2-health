@@ -116,7 +116,7 @@ class Health {
             });
             this.testProbes();
         });
-        Pmx.action("hold", (p, reply) => {
+        Pmx.action("hold", undefined, (p, reply) => {
             let t = HOLD_PERIOD_M;
             if (p) {
                 const n = Number.parseInt(p);
@@ -129,25 +129,27 @@ class Health {
             Log_1.info(msg);
             reply(msg);
         });
-        Pmx.action("unheld", (reply) => {
+        Pmx.action("unheld", undefined, (reply) => {
             this._holdTill = null;
-            reply(`mail unheld`);
+            Log_1.info("mail unheld");
+            reply("mail unheld");
         });
-        Pmx.action("mail", async (reply) => {
+        Pmx.action("mail", undefined, async (reply) => {
             try {
                 await this._mail.send("Test only", "This is test only.");
-                reply(`mail send`);
+                Log_1.info("mail send");
+                reply("mail send");
             }
             catch (ex) {
                 reply(`mail failed: ${ex.message || ex}`);
             }
         });
-        Pmx.action("dump", (reply) => {
+        Pmx.action("dump", undefined, (reply) => {
             this._snapshot.dump();
             reply(`dumping`);
         });
         // for dev. only
-        Pmx.action("debug", reply => {
+        Pmx.action("debug", undefined, (reply) => {
             PM2.list((ex, list) => {
                 stopIfEx(ex);
                 Fs.writeFileSync("pm2-health-debug.json", JSON.stringify(list));
@@ -242,7 +244,7 @@ class Health {
 exports.Health = Health;
 function stopIfEx(ex) {
     if (ex) {
-        console.error(ex.message || ex);
+        Log_1.error(ex.message || ex);
         PM2.disconnect();
         process.exit(1);
     }

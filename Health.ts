@@ -200,7 +200,7 @@ export class Health {
             this.testProbes();
         });
 
-        Pmx.action("hold", (p, reply) => {
+        Pmx.action("hold", undefined, (p, reply) => {
             let t = HOLD_PERIOD_M;
             if (p) {
                 const n = Number.parseInt(p);
@@ -216,28 +216,30 @@ export class Health {
             reply(msg);
         });
 
-        Pmx.action("unheld", (reply) => {
+        Pmx.action("unheld", undefined, (reply) => {
             this._holdTill = null;
-            reply(`mail unheld`);
+            info("mail unheld");
+            reply("mail unheld");
         });
 
-        Pmx.action("mail", async (reply) => {
+        Pmx.action("mail", undefined, async (reply) => {
             try {
                 await this._mail.send("Test only", "This is test only.");
-                reply(`mail send`);
+                info("mail send");
+                reply("mail send");
             }
             catch (ex) {
                 reply(`mail failed: ${ex.message || ex}`);
             }
         });
 
-        Pmx.action("dump", (reply) => {
+        Pmx.action("dump", undefined, (reply) => {
             this._snapshot.dump();
             reply(`dumping`);
         });
 
         // for dev. only
-        Pmx.action("debug", reply => {
+        Pmx.action("debug", undefined, (reply) => {
             PM2.list((ex, list) => {
                 stopIfEx(ex);
 
@@ -370,9 +372,9 @@ export class Health {
     }
 }
 
-export function stopIfEx(ex: Error) {
+export function stopIfEx(ex: any) {
     if (ex) {
-        console.error(ex.message || ex);
+        error(ex.message || ex);
         PM2.disconnect();
         process.exit(1);
     }
