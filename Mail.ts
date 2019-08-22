@@ -1,7 +1,7 @@
 import * as Mailer from "nodemailer";
 import * as Fs from "fs";
 import { hostname } from "os";
-import { info } from "./Log";
+import { info, debug } from "./Log";
 
 export interface ISmtpConfig {
     smtp: {
@@ -45,8 +45,10 @@ export class Mail {
     }
 
     async send(subject: string, body: string, priority?: "high" | "low", attachements = []) {
-        if (this._config.smtp.disabled === true)
+        if (this._config.smtp.disabled === true) {
+            debug("mail sending is disbled in config");
             return;
+        }
 
         const temp = {
             host: this._config.smtp.host,

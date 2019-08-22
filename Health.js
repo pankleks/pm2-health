@@ -23,6 +23,8 @@ class Health {
         this._config = _config;
         this._holdTill = null;
         this._timeouts = new Map();
+        if (this._config.debugLogEnabled === true)
+            Log_1.enableDebugLog();
         if (this._config.metricIntervalS == null || this._config.metricIntervalS < MERTIC_INTERVAL_S) {
             Log_1.info(`setting default metric check interval ${MERTIC_INTERVAL_S} s.`);
             this._config.metricIntervalS = MERTIC_INTERVAL_S;
@@ -182,6 +184,7 @@ class Health {
         }
     }
     testProbes() {
+        Log_1.debug("testing probes");
         const alerts = [];
         PM2.list(async (ex, list) => {
             stopIfEx(ex);

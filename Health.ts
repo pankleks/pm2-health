@@ -5,7 +5,7 @@ import { basename } from "path";
 import { Mail, ISmtpConfig } from "./Mail";
 import { Snapshot, IShapshotConfig, IAuth } from "./Snapshot";
 import { Fetch } from "planck-http-fetch";
-import { info, error } from "./Log";
+import { info, error, debug, enableDebugLog } from "./Log";
 
 const
     MERTIC_INTERVAL_S = 60,
@@ -54,7 +54,8 @@ interface IConfig extends IMonitConfig, ISmtpConfig, IShapshotConfig {
         url: string;
         auth?: IAuth;
         fetchIntervalM: number;
-    }
+    },
+    debugLogEnabled?: boolean;
 }
 
 export class Health {
@@ -63,6 +64,9 @@ export class Health {
     _holdTill: Date = null;
 
     constructor(private _config: IConfig) {
+        if (this._config.debugLogEnabled === true)
+            enableDebugLog();
+
         if (this._config.metricIntervalS == null || this._config.metricIntervalS < MERTIC_INTERVAL_S) {
             info(`setting default metric check interval ${MERTIC_INTERVAL_S} s.`);
             this._config.metricIntervalS = MERTIC_INTERVAL_S;
@@ -288,6 +292,8 @@ export class Health {
     }
 
     private testProbes() {
+        debug("testing probes");
+
         const alerts = [];
 
         PM2.list(async (ex, list) => {

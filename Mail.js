@@ -28,8 +28,10 @@ class Mail {
         }
     }
     async send(subject, body, priority, attachements = []) {
-        if (this._config.smtp.disabled === true)
+        if (this._config.smtp.disabled === true) {
+            Log_1.debug("mail sending is disbled in config");
             return;
+        }
         const temp = {
             host: this._config.smtp.host,
             port: this._config.smtp.port,

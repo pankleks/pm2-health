@@ -65,6 +65,8 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 * `webConfig` - if set, some of the config settings can be downloaded from given url (optional). See [Web config](#web-config)
 
+* `debugLogEnabled` - if `true` debug log is enabled, by default is `false` (optional)
+
 ## Metrics monitoring
 
 `pm2-health` can monitor any PMX metrics defined in your apps.
