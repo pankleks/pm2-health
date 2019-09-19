@@ -1,3 +1,6 @@
+# 1.10.6
+- revert pm2 version upgrade to pmx due pmx issues
+
 # 1.10.0
 - updated dependencies to newest
 - added license file (#23)

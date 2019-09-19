@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const PM2 = require("pm2");
-const Pmx = require("@pm2/io");
+const Pmx = require("pmx");
 const Fs = require("fs");
 const path_1 = require("path");
 const Mail_1 = require("./Mail");
