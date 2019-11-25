@@ -26,9 +26,9 @@ class Notify {
     async sendBatch() {
         let body = "", i = 1;
         for (const message of this._messages)
-            body += `------ ${i++} / ${this._messages.length} ------ ${message.on.toISOString()} ------<br/>${message.body}`;
+            body += `-------- ${i++} | ${message.subject} | ${message.on.toISOString()} --------<br/>${message.body}`;
         const temp = {
-            subject: this._messages[0].subject + (this._messages.length > 1 ? ` +(${this._messages.length})` : ""),
+            subject: `${this._messages[0].subject} (${this._messages.length} items)`,
             body,
             attachements: this._messages.filter(e => e.attachements != null).map(e => e.attachements).reduce((p, c) => p.concat(c), [])
         };
