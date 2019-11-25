@@ -2,7 +2,7 @@ import * as PM2 from "pm2";
 import * as Pmx from "pmx";
 import * as Fs from "fs";
 import { basename } from "path";
-import { Mail, ISmtpConfig } from "./Mail";
+import { Mail, ISmtpConfig, Notify } from "./Mail";
 import { Snapshot, IShapshotConfig, IAuth } from "./Snapshot";
 import { Fetch } from "planck-http-fetch";
 import { info, error, debug, enableDebugLog } from "./Log";
@@ -59,9 +59,8 @@ interface IConfig extends IMonitConfig, ISmtpConfig, IShapshotConfig {
 }
 
 export class Health {
-    readonly _mail: Mail;
+    readonly _notify: Notify;
     readonly _snapshot: Snapshot;
-    _holdTill: Date = null;
 
     constructor(private _config: IConfig) {
         if (this._config.debugLogEnabled === true)
@@ -75,7 +74,7 @@ export class Health {
         if (!this._config.metric)
             this._config.metric = {};
 
-        this._mail = new Mail(_config);
+        this._notify = new Notify(_config);
         this._snapshot = new Snapshot(this._config);
     }
 
@@ -155,14 +154,15 @@ export class Health {
                     if (Array.isArray(this._config.events) && this._config.events.indexOf(data.event) === -1)
                         return;
 
-                    this.mail(
-                        `${data.process.name}:${data.process.pm_id} - ${data.event}`,
-                        `
+                    this._notify.send({
+                        subject: `${data.process.name}:${data.process.pm_id} - ${data.event}`,
+                        body: `
                         <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
                         <p>Event: <b>${data.event}</b></p>
                         <pre>${JSON.stringify(data, undefined, 4)}</pre>`,
-                        "high",
-                        LOGS.filter(e => this._config.addLogs === true && data.process[e]).map(e => ({ filename: basename(data.process[e]), path: data.process[e] })));
+                        priority: "high",
+                        attachements: LOGS.filter(e => this._config.addLogs === true && data.process[e]).map(e => ({ filename: basename(data.process[e]), path: data.process[e] }))
+                    });
                 });
 
                 if (this._config.exceptions)
@@ -170,12 +170,13 @@ export class Health {
                         if (!this.isAppIncluded(data.process.name))
                             return;
 
-                        this.mail(
-                            `${data.process.name}:${data.process.pm_id} - exception`,
-                            `
+                        this._notify.send({
+                            subject: `${data.process.name}:${data.process.pm_id} - exception`,
+                            body: `
                             <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>                            
                             <pre>${JSON.stringify(data.data, undefined, 4)}</pre>`,
-                            "high");
+                            priority: "high"
+                        });
                     });
 
                 if (this._config.messages)
@@ -193,11 +194,12 @@ export class Health {
                         if (this._messageExcludeExps.some(e => e.test(json)))
                             return; // exclude
 
-                        this.mail(
-                            `${data.process.name}:${data.process.pm_id} - message`,
-                            `
+                        this._notify.send({
+                            subject: `${data.process.name}:${data.process.pm_id} - message`,
+                            body: `
                             <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
-                            <pre>${json}</pre>`);
+                            <pre>${json}</pre>`
+                        });
                     });
             });
 
@@ -212,23 +214,25 @@ export class Health {
                     t = n;
             }
 
-            this._holdTill = new Date();
-            this._holdTill.setTime(this._holdTill.getTime() + t * 60000);
+            const holdTill = new Date();
+            holdTill.setTime(holdTill.getTime() + t * 60000);
 
-            const msg = `mail held for ${t} minutes, till ${this._holdTill.toISOString()}`;
+            this._notify.hold(holdTill)
+
+            const msg = `mail held for ${t} minutes, till ${holdTill.toISOString()}`;
             info(msg);
             reply(msg);
         });
 
         Pmx.action("unheld", undefined, (reply) => {
-            this._holdTill = null;
+            this._notify.hold(null);
             info("mail unheld");
             reply("mail unheld");
         });
 
         Pmx.action("mail", undefined, async (reply) => {
             try {
-                await this._mail.send("Test only", "This is test only.");
+                await this._notify.send({ subject: "Test only", body: "This is test only.", priority: "high" });    // high -> to bypass batching
                 info("mail send");
                 reply("mail send");
             }
@@ -265,30 +269,17 @@ export class Health {
             setTimeout(() => {
                 info(`death ${process.name}:${process.pm_id}, count ${count}`);
 
-                this.mail(
-                    `${process.name}:${process.pm_id} - is death!`,
-                    `
+                this._notify.send({
+                    subject: `${process.name}:${process.pm_id} - is death!`,
+                    body: `
                     <p>App: <b>${process.name}:${process.pm_id}</b></p>
                     <p>This is <b>${count}/${ALIVE_MAX_CONSECUTIVE_TESTS}</b> consecutive notice.</p>`,
-                    "high");
+                    priority: "high"
+                });
 
                 if (count < ALIVE_MAX_CONSECUTIVE_TESTS)
                     this.aliveReset(process, ALIVE_CONSECUTIVE_TIMEOUT_S, count + 1);
             }, timeoutS * 1000));
-    }
-
-    private async mail(subject: string, body: string, priority?: "high" | "low", attachements = []) {
-        const t = new Date();
-        if (this._holdTill != null && t < this._holdTill)
-            return; // skip
-
-        try {
-            await this._mail.send(subject, body, priority, attachements);
-            info(`mail [${subject}] sent`);
-        }
-        catch (ex) {
-            error(`mail failed -> ${ex.message || ex}`);
-        }
     }
 
     private testProbes() {
@@ -360,16 +351,17 @@ export class Health {
             await this._snapshot.send();
 
             if (alerts.length > 0)
-                this.mail(
-                    `${alerts.length} alert(s)`,
-                    `
+                this._notify.send({
+                    subject: `${alerts.length} alert(s)`,
+                    body: `
                     <table>
                         <tr>
                             <th>App</th><th>Metric</th><th>Value</th><th>Prev. Value</th><th>Target</th>
                         </tr>
                         ${alerts.join("")}
                     </table>`,
-                    "high");
+                    priority: "high"
+                });
 
             setTimeout(
                 () => { this.testProbes(); },

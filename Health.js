@@ -21,7 +21,6 @@ const MERTIC_INTERVAL_S = 60, HOLD_PERIOD_M = 30, ALIVE_MAX_CONSECUTIVE_TESTS = 
 class Health {
     constructor(_config) {
         this._config = _config;
-        this._holdTill = null;
         this._timeouts = new Map();
         if (this._config.debugLogEnabled === true)
             Log_1.enableDebugLog();
@@ -31,7 +30,7 @@ class Health {
         }
         if (!this._config.metric)
             this._config.metric = {};
-        this._mail = new Mail_1.Mail(_config);
+        this._notify = new Mail_1.Notify(_config);
         this._snapshot = new Snapshot_1.Snapshot(this._config);
     }
     async fetchConfig() {
@@ -87,18 +86,27 @@ class Health {
                         return;
                     if (Array.isArray(this._config.events) && this._config.events.indexOf(data.event) === -1)
                         return;
-                    this.mail(`${data.process.name}:${data.process.pm_id} - ${data.event}`, `
+                    this._notify.send({
+                        subject: `${data.process.name}:${data.process.pm_id} - ${data.event}`,
+                        body: `
                         <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
                         <p>Event: <b>${data.event}</b></p>
-                        <pre>${JSON.stringify(data, undefined, 4)}</pre>`, "high", LOGS.filter(e => this._config.addLogs === true && data.process[e]).map(e => ({ filename: path_1.basename(data.process[e]), path: data.process[e] })));
+                        <pre>${JSON.stringify(data, undefined, 4)}</pre>`,
+                        priority: "high",
+                        attachements: LOGS.filter(e => this._config.addLogs === true && data.process[e]).map(e => ({ filename: path_1.basename(data.process[e]), path: data.process[e] }))
+                    });
                 });
                 if (this._config.exceptions)
                     bus.on("process:exception", (data) => {
                         if (!this.isAppIncluded(data.process.name))
                             return;
-                        this.mail(`${data.process.name}:${data.process.pm_id} - exception`, `
+                        this._notify.send({
+                            subject: `${data.process.name}:${data.process.pm_id} - exception`,
+                            body: `
                             <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>                            
-                            <pre>${JSON.stringify(data.data, undefined, 4)}</pre>`, "high");
+                            <pre>${JSON.stringify(data.data, undefined, 4)}</pre>`,
+                            priority: "high"
+                        });
                     });
                 if (this._config.messages)
                     bus.on("process:msg", (data) => {
@@ -111,9 +119,12 @@ class Health {
                         const json = JSON.stringify(data.data, undefined, 4);
                         if (this._messageExcludeExps.some(e => e.test(json)))
                             return; // exclude
-                        this.mail(`${data.process.name}:${data.process.pm_id} - message`, `
+                        this._notify.send({
+                            subject: `${data.process.name}:${data.process.pm_id} - message`,
+                            body: `
                             <p>App: <b>${data.process.name}:${data.process.pm_id}</b></p>
-                            <pre>${json}</pre>`);
+                            <pre>${json}</pre>`
+                        });
                     });
             });
             this.testProbes();
@@ -125,20 +136,21 @@ class Health {
                 if (!Number.isNaN(n))
                     t = n;
             }
-            this._holdTill = new Date();
-            this._holdTill.setTime(this._holdTill.getTime() + t * 60000);
-            const msg = `mail held for ${t} minutes, till ${this._holdTill.toISOString()}`;
+            const holdTill = new Date();
+            holdTill.setTime(holdTill.getTime() + t * 60000);
+            this._notify.hold(holdTill);
+            const msg = `mail held for ${t} minutes, till ${holdTill.toISOString()}`;
             Log_1.info(msg);
             reply(msg);
         });
         Pmx.action("unheld", undefined, (reply) => {
-            this._holdTill = null;
+            this._notify.hold(null);
             Log_1.info("mail unheld");
             reply("mail unheld");
         });
         Pmx.action("mail", undefined, async (reply) => {
             try {
-                await this._mail.send("Test only", "This is test only.");
+                await this._notify.send({ subject: "Test only", body: "This is test only.", priority: "high" }); // high -> to bypass batching
                 Log_1.info("mail send");
                 reply("mail send");
             }
@@ -164,24 +176,16 @@ class Health {
         clearTimeout(this._timeouts.get(process.name));
         this._timeouts.set(process.name, setTimeout(() => {
             Log_1.info(`death ${process.name}:${process.pm_id}, count ${count}`);
-            this.mail(`${process.name}:${process.pm_id} - is death!`, `
+            this._notify.send({
+                subject: `${process.name}:${process.pm_id} - is death!`,
+                body: `
                     <p>App: <b>${process.name}:${process.pm_id}</b></p>
-                    <p>This is <b>${count}/${ALIVE_MAX_CONSECUTIVE_TESTS}</b> consecutive notice.</p>`, "high");
+                    <p>This is <b>${count}/${ALIVE_MAX_CONSECUTIVE_TESTS}</b> consecutive notice.</p>`,
+                priority: "high"
+            });
             if (count < ALIVE_MAX_CONSECUTIVE_TESTS)
                 this.aliveReset(process, ALIVE_CONSECUTIVE_TIMEOUT_S, count + 1);
         }, timeoutS * 1000));
-    }
-    async mail(subject, body, priority, attachements = []) {
-        const t = new Date();
-        if (this._holdTill != null && t < this._holdTill)
-            return; // skip
-        try {
-            await this._mail.send(subject, body, priority, attachements);
-            Log_1.info(`mail [${subject}] sent`);
-        }
-        catch (ex) {
-            Log_1.error(`mail failed -> ${ex.message || ex}`);
-        }
     }
     testProbes() {
         Log_1.debug("testing probes");
@@ -233,13 +237,17 @@ class Health {
             this._snapshot.inactivate();
             await this._snapshot.send();
             if (alerts.length > 0)
-                this.mail(`${alerts.length} alert(s)`, `
+                this._notify.send({
+                    subject: `${alerts.length} alert(s)`,
+                    body: `
                     <table>
                         <tr>
                             <th>App</th><th>Metric</th><th>Value</th><th>Prev. Value</th><th>Target</th>
                         </tr>
                         ${alerts.join("")}
-                    </table>`, "high");
+                    </table>`,
+                    priority: "high"
+                });
             setTimeout(() => { this.testProbes(); }, 1000 * this._config.metricIntervalS);
         });
     }

@@ -193,6 +193,19 @@ Url must return UTF-8 JSON with config properties.
 
 > Only following properties can be used: `events`, `metric`, `exceptions`, `messages`, `messageExcludeExps`, `appsExcluded`, `metricIntervalS`, `addLogs`
 
+## Message batching
+
+Feature added in (1.11.0) allows to merge messages over certain period and send them as single message.
+This can be used to limit number of messages sent (prevent spam).
+To enable please use following flags in `smtp` config section:
+
+- `batchPeriodM` - period (minutes) to batch, if not set batching is not enabled
+- `batchMaxMessages` - max. number of messages in batch (optional)
+
+Batch message will be send after `batchPeriodM` elapses or if number of messages collected are greater than `batchMaxMessages`.
+
+> `high` priority messages (as errors) are not batched, always sent immediatelly.
+
 ## Hold notifications temporarily
 
 To hold mail notification: `pm2 trigger pm2-health hold 30`

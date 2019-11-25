@@ -1,3 +1,6 @@
+# 1.11.0
+- added batching of messages
+
 # 1.10.6
 - revert pm2 version upgrade to pmx due pmx issues
 
