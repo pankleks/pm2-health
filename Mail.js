@@ -61,49 +61,4 @@ class Mail {
     }
 }
 exports.Mail = Mail;
-class Notify {
-    constructor(_config) {
-        this._config = _config;
-        this._holdTill = null;
-        this._messages = [];
-        this._lastBatchT = new Date().getTime();
-        this._mail = new Mail(this._config);
-    }
-    hold(till) {
-        this._holdTill = till;
-    }
-    async send(message) {
-        const t = new Date();
-        if (this._holdTill != null && t < this._holdTill)
-            return; // skip
-        if (this._config.batchPeriodM > 0 && message.priority !== "high") {
-            this._messages.push(message);
-            if (t.getTime() - this._lastBatchT > this._config.batchPeriodM * 1000 * 60 ||
-                (this._config.batchMaxMessages > 0 && this._messages.length > this._config.batchMaxMessages)) {
-                const temp = {
-                    subject: this._messages[0].subject + (this._messages.length > 1 ? ` +(${this._messages.length})` : ""),
-                    body: this._messages.map(e => e.body).join("<hr/>"),
-                    attachements: this._messages.filter(e => e.attachements != null).map(e => e.attachements).reduce((p, c) => p.concat(c), [])
-                };
-                try {
-                    await this._mail.send(temp);
-                    this._messages = [];
-                    this._lastBatchT = t.getTime();
-                }
-                catch (ex) {
-                    Log_1.error(`can't send batch mail -> ${ex.message || ex}`);
-                }
-            }
-        }
-        else {
-            try {
-                this._mail.send(message);
-            }
-            catch (ex) {
-                Log_1.error(`can't send mail -> ${ex.message || ex}`);
-            }
-        }
-    }
-}
-exports.Notify = Notify;
 //# sourceMappingURL=Mail.js.map

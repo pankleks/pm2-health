@@ -1,6 +1,6 @@
 {
   "name": "pm2-health",
-  "version": "1.11.0",
+  "version": "1.11.3",
   "description": "Apps health monitor and mail notification module for pm2",
   "main": "App.js",
   "scripts": {
@@ -43,6 +43,8 @@
     },
     "mailTo": "mail1,mail2",
     "replyTo": "",
+    "batchPeriodM": 0,
+    "batchMaxMessages": 0,
     "events": [
       "exit"
     ],

@@ -67,6 +67,10 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 * `debugLogEnabled` - if `true` debug log is enabled, by default is `false` (optional)
 
+* `batchPeriodM` - enables message batching and sets batching period (optional). See [Message batching](#message-batching)
+
+* `batchMaxMessages` - max. messages in batch (optional). See [Message batching](#message-batching)
+
 ## Metrics monitoring
 
 `pm2-health` can monitor any PMX metrics defined in your apps.
@@ -172,7 +176,7 @@ After first alert, following test is done every 10 minues for 6 consecutive time
 
 ## Web config
 
-Web config (added in 1.7.0) allows you to fetch some of the config settings from web url.
+Web config (added in 1.7) allows you to fetch some of the config settings from web url.
 
 Sample config:
 
@@ -195,16 +199,20 @@ Url must return UTF-8 JSON with config properties.
 
 ## Message batching
 
-Feature added in (1.11.0) allows to merge messages over certain period and send them as single message.
-This can be used to limit number of messages sent (prevent spam).
-To enable please use following flags in `smtp` config section:
+Feature added in (1.11) allows to merge multiple messages over period of time and send them as single message.
 
-- `batchPeriodM` - period (minutes) to batch, if not set batching is not enabled
+This can be used to limit number of messages sent (prevent spam).
+
+To enable please set following properties in config section:
+
+- `batchPeriodM` - period (in minutes) to batch, if not set batching is not enabled
 - `batchMaxMessages` - max. number of messages in batch (optional)
 
 Batch message will be send after `batchPeriodM` elapses or if number of messages collected are greater than `batchMaxMessages`.
 
-> `high` priority messages (as errors) are not batched, always sent immediatelly.
+> Priority messages (as exceptions etc.) are not batched and sent immediatelly.
+
+> It's advised to set `batchMaxMessages` to prevent huge messages.
 
 ## Hold notifications temporarily
 

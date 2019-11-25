@@ -2,10 +2,11 @@ import * as PM2 from "pm2";
 import * as Pmx from "pmx";
 import * as Fs from "fs";
 import { basename } from "path";
-import { Mail, ISmtpConfig, Notify } from "./Mail";
+import { ISmtpConfig } from "./Mail";
 import { Snapshot, IShapshotConfig, IAuth } from "./Snapshot";
 import { Fetch } from "planck-http-fetch";
 import { info, error, debug, enableDebugLog } from "./Log";
+import { Notify } from "./Notify";
 
 const
     MERTIC_INTERVAL_S = 60,
@@ -65,6 +66,8 @@ export class Health {
     constructor(private _config: IConfig) {
         if (this._config.debugLogEnabled === true)
             enableDebugLog();
+
+        debug(JSON.stringify(this._config, undefined, 2));
 
         if (this._config.metricIntervalS == null || this._config.metricIntervalS < MERTIC_INTERVAL_S) {
             info(`setting default metric check interval ${MERTIC_INTERVAL_S} s.`);
