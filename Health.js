@@ -59,6 +59,7 @@ class Health {
         this._messageExcludeExps = [];
         if (Array.isArray(this._config.messageExcludeExps))
             this._messageExcludeExps = this._config.messageExcludeExps.map(e => new RegExp(e));
+        this._notify.configChanged();
     }
     isAppIncluded(app) {
         if (app === "pm2-health")

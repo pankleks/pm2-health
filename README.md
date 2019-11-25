@@ -195,7 +195,7 @@ Sample config:
 
 Url must return UTF-8 JSON with config properties.
 
-> Only following properties can be used: `events`, `metric`, `exceptions`, `messages`, `messageExcludeExps`, `appsExcluded`, `metricIntervalS`, `addLogs`
+> Only following properties can be used: `events`, `metric`, `exceptions`, `messages`, `messageExcludeExps`, `appsExcluded`, `metricIntervalS`, `addLogs`, `batchPeriodM`, `batchMaxMessages`
 
 ## Message batching
 
@@ -213,6 +213,8 @@ Batch message will be send after `batchPeriodM` elapses or if number of messages
 > Priority messages (as exceptions etc.) are not batched and sent immediatelly.
 
 > It's advised to set `batchMaxMessages` to prevent huge messages.
+
+> Batching settings can be changed by web config.
 
 ## Hold notifications temporarily
 

@@ -7,23 +7,28 @@ export class Notify {
     private readonly _mail: Mail;
     private _holdTill: Date = null;
     private _messages: IMessage[] = [];
+    private _t: NodeJS.Timer;
 
     constructor(private readonly _config: ISmtpConfig) {
         this._mail = new Mail(this._config);
+    }
+
+    private get isEnabled() {
+        return this._config.batchPeriodM > 0;
+    }
+
+    configChanged() {
+        clearInterval(this._t);
 
         if (this.isEnabled) {
-            debug(`message batching is enabled`);
+            debug(`message batching is enabled, period = ${this._config.batchPeriodM} minutes`);
 
-            setInterval(async () => {
+            this._t = setInterval(async () => {
                 if (this._messages.length > 0)
                     await this.sendBatch();
 
             }, this._config.batchPeriodM * 60 * 1000);
         }
-    }
-
-    private get isEnabled() {
-        return this._config.batchPeriodM > 0;
     }
 
     hold(till: Date) {

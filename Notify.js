@@ -9,16 +9,19 @@ class Notify {
         this._holdTill = null;
         this._messages = [];
         this._mail = new Mail_1.Mail(this._config);
+    }
+    get isEnabled() {
+        return this._config.batchPeriodM > 0;
+    }
+    configChanged() {
+        clearInterval(this._t);
         if (this.isEnabled) {
-            Log_1.debug(`message batching is enabled`);
-            setInterval(async () => {
+            Log_1.debug(`message batching is enabled, period = ${this._config.batchPeriodM} minutes`);
+            this._t = setInterval(async () => {
                 if (this._messages.length > 0)
                     await this.sendBatch();
             }, this._config.batchPeriodM * 60 * 1000);
         }
-    }
-    get isEnabled() {
-        return this._config.batchPeriodM > 0;
     }
     hold(till) {
         this._holdTill = till;
