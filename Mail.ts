@@ -24,6 +24,7 @@ export interface IMessage {
     body: string;
     priority?: "high" | "low";
     attachements?: any[];
+    on?: Date
 }
 
 export class Mail {

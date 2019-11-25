@@ -4,11 +4,11 @@ import { debug, error } from "./Log";
 // todo: add messages persistance in case of crash
 
 export class Notify {
-    private _mail: Mail;
+    private readonly _mail: Mail;
     private _holdTill: Date = null;
     private _messages: IMessage[] = [];
 
-    constructor(private _config: ISmtpConfig) {
+    constructor(private readonly _config: ISmtpConfig) {
         this._mail = new Mail(this._config);
 
         if (this.isEnabled) {
@@ -20,8 +20,6 @@ export class Notify {
 
             }, this._config.batchPeriodM * 60 * 1000);
         }
-        else
-            debug(`message batching is disabled`);
     }
 
     private get isEnabled() {
@@ -32,18 +30,25 @@ export class Notify {
         this._holdTill = till;
     }
 
-    async sendBatch() {
+    private async sendBatch() {
+        let
+            body = "",
+            i = 1;
+
+        for (const message of this._messages)
+            body += `------ ${i++} / ${this._messages.length} ------ ${message.on.toISOString()} ------<br/>${message.body}`;
+
         const temp: IMessage = {
             subject: this._messages[0].subject + (this._messages.length > 1 ? ` +(${this._messages.length})` : ""),
-            body: this._messages.map(e => e.body).join("<hr/>"),
+            body,
             attachements: this._messages.filter(e => e.attachements != null).map(e => e.attachements).reduce((p, c) => p.concat(c), [])
         }
 
         try {
             await this._mail.send(temp);
 
-            this._messages = [];
             debug(`batch of ${this._messages.length} messages sent`);
+            this._messages = [];
         }
         catch (ex) {
             error(`can't send batch mail -> ${ex.message || ex}`);
@@ -53,6 +58,8 @@ export class Notify {
     async send(message: IMessage) {
         const t = new Date();
 
+        message.on = t;
+
         if (this._holdTill != null && t < this._holdTill)
             return; // skip
 
@@ -61,7 +68,7 @@ export class Notify {
 
             this._messages.push(message);
 
-            if (this._config.batchMaxMessages > 0 && this._messages.length > this._config.batchMaxMessages)
+            if (this._config.batchMaxMessages > 0 && this._messages.length >= this._config.batchMaxMessages)
                 await this.sendBatch();
         }
         else {

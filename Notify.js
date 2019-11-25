@@ -16,8 +16,6 @@ class Notify {
                     await this.sendBatch();
             }, this._config.batchPeriodM * 60 * 1000);
         }
-        else
-            Log_1.debug(`message batching is disabled`);
     }
     get isEnabled() {
         return this._config.batchPeriodM > 0;
@@ -26,15 +24,18 @@ class Notify {
         this._holdTill = till;
     }
     async sendBatch() {
+        let body = "", i = 1;
+        for (const message of this._messages)
+            body += `------ ${i++} / ${this._messages.length} ------ ${message.on.toISOString()} ------<br/>${message.body}`;
         const temp = {
             subject: this._messages[0].subject + (this._messages.length > 1 ? ` +(${this._messages.length})` : ""),
-            body: this._messages.map(e => e.body).join("<hr/>"),
+            body,
             attachements: this._messages.filter(e => e.attachements != null).map(e => e.attachements).reduce((p, c) => p.concat(c), [])
         };
         try {
             await this._mail.send(temp);
-            this._messages = [];
             Log_1.debug(`batch of ${this._messages.length} messages sent`);
+            this._messages = [];
         }
         catch (ex) {
             Log_1.error(`can't send batch mail -> ${ex.message || ex}`);
@@ -42,12 +43,13 @@ class Notify {
     }
     async send(message) {
         const t = new Date();
+        message.on = t;
         if (this._holdTill != null && t < this._holdTill)
             return; // skip
         if (this.isEnabled && message.priority !== "high") {
             Log_1.debug(`message (batch) -> ${message.subject}`);
             this._messages.push(message);
-            if (this._config.batchMaxMessages > 0 && this._messages.length > this._config.batchMaxMessages)
+            if (this._config.batchMaxMessages > 0 && this._messages.length >= this._config.batchMaxMessages)
                 await this.sendBatch();
         }
         else {
