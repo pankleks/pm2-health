@@ -23,8 +23,7 @@ const
         ">=": (a, b, t) => a >= b,
         "!=": (a, b, t) => a !== b,
         "!~": (a, b, t) => Math.abs(a - b) > t
-    },
-    CONFIG_KEYS = ["events", "metric", "exceptions", "messages", "messageExcludeExps", "appsExcluded", "metricIntervalS", "addLogs", "aliveTimeoutS"];
+    };
 
 interface IMonitConfig {
     events: string[];
@@ -58,6 +57,9 @@ interface IConfig extends IMonitConfig, ISmtpConfig, IShapshotConfig {
     },
     debugLogEnabled?: boolean;
 }
+
+// keys that can be updated by web config
+const CONFIG_KEYS: (keyof IConfig)[] = ["events", "metric", "exceptions", "messages", "messageExcludeExps", "appsExcluded", "metricIntervalS", "addLogs", "aliveTimeoutS", "batchPeriodM", "batchMaxMessages"];
 
 export class Health {
     readonly _notify: Notify;
@@ -94,9 +96,9 @@ export class Health {
 
             // map config keys
             for (const key of CONFIG_KEYS)
-                if (config[key]) {
-                    this._config[key] = config[key];
-                    info(`applying [${key}]`);
+                if (config[key] != null) {
+                    this._config[<string>key] = config[key];
+                    info(`applying [${key}] = ${config[key]}`);
                 }
 
             this.configChanged();

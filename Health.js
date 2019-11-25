@@ -17,7 +17,9 @@ const MERTIC_INTERVAL_S = 60, HOLD_PERIOD_M = 30, ALIVE_MAX_CONSECUTIVE_TESTS = 
     ">=": (a, b, t) => a >= b,
     "!=": (a, b, t) => a !== b,
     "!~": (a, b, t) => Math.abs(a - b) > t
-}, CONFIG_KEYS = ["events", "metric", "exceptions", "messages", "messageExcludeExps", "appsExcluded", "metricIntervalS", "addLogs", "aliveTimeoutS"];
+};
+// keys that can be updated by web config
+const CONFIG_KEYS = ["events", "metric", "exceptions", "messages", "messageExcludeExps", "appsExcluded", "metricIntervalS", "addLogs", "aliveTimeoutS", "batchPeriodM", "batchMaxMessages"];
 class Health {
     constructor(_config) {
         this._config = _config;
@@ -43,9 +45,9 @@ class Health {
             const json = await fetch.fetch(), config = JSON.parse(json);
             // map config keys
             for (const key of CONFIG_KEYS)
-                if (config[key]) {
+                if (config[key] != null) {
                     this._config[key] = config[key];
-                    Log_1.info(`applying [${key}]`);
+                    Log_1.info(`applying [${key}] = ${config[key]}`);
                 }
             this.configChanged();
         }
