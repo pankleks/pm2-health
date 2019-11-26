@@ -14,6 +14,7 @@ class Notify {
         return this._config.batchPeriodM > 0;
     }
     configChanged() {
+        this._mail.configChanged();
         clearInterval(this._t);
         if (this.isEnabled) {
             Log_1.debug(`message batching is enabled, period = ${this._config.batchPeriodM} minutes`);

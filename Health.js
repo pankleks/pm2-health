@@ -37,6 +37,7 @@ class Health {
         this._snapshot = new Snapshot_1.Snapshot(this._config);
     }
     async fetchConfig() {
+        // todo: what if web config contains invalid data, changes should be reversed
         try {
             Log_1.info(`fetching config from [${this._config.webConfig.url}]`);
             const fetch = new planck_http_fetch_1.Fetch(this._config.webConfig.url);

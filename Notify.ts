@@ -18,6 +18,8 @@ export class Notify {
     }
 
     configChanged() {
+        this._mail.configChanged();
+
         clearInterval(this._t);
 
         if (this.isEnabled) {

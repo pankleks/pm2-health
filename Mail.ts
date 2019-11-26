@@ -43,8 +43,6 @@ export class Mail {
             throw new Error(`[smtp.host] not set`);
         if (!this._config.smtp)
             throw new Error(`[smtp.port] not set`);
-        if (!this._config.mailTo)
-            throw new Error(`[mailTo] not set`);
 
         try {
             this._template = Fs.readFileSync("Template.html", "utf8");
@@ -52,6 +50,11 @@ export class Mail {
         catch {
             info(`Template.html not found`);
         }
+    }
+
+    configChanged() {
+        if (!this._config.mailTo)
+            throw new Error(`[mailTo] not set`);
     }
 
     async send(message: IMessage) {

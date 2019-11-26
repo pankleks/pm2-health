@@ -84,12 +84,15 @@ export class Health {
     }
 
     async fetchConfig() {
+        // todo: what if web config contains invalid data, changes should be reversed
         try {
             info(`fetching config from [${this._config.webConfig.url}]`);
 
             const fetch = new Fetch(this._config.webConfig.url);
+
             if (this._config.webConfig.auth && this._config.webConfig.auth.user)  // auth
                 fetch.basicAuth(this._config.webConfig.auth.user, this._config.webConfig.auth.password);
+
             const
                 json = await fetch.fetch(),
                 config = JSON.parse(json);
