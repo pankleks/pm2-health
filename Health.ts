@@ -59,7 +59,7 @@ interface IConfig extends IMonitConfig, ISmtpConfig, IShapshotConfig {
 }
 
 // keys that can be updated by web config
-const CONFIG_KEYS: (keyof IConfig)[] = ["events", "metric", "exceptions", "messages", "messageExcludeExps", "appsExcluded", "metricIntervalS", "addLogs", "aliveTimeoutS", "batchPeriodM", "batchMaxMessages"];
+const CONFIG_KEYS: (keyof IConfig)[] = ["events", "metric", "exceptions", "messages", "messageExcludeExps", "appsExcluded", "metricIntervalS", "addLogs", "aliveTimeoutS", "batchPeriodM", "batchMaxMessages", "mailTo", "replyTo"];
 
 export class Health {
     readonly _notify: Notify;

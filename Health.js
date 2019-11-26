@@ -19,7 +19,7 @@ const MERTIC_INTERVAL_S = 60, HOLD_PERIOD_M = 30, ALIVE_MAX_CONSECUTIVE_TESTS = 
     "!~": (a, b, t) => Math.abs(a - b) > t
 };
 // keys that can be updated by web config
-const CONFIG_KEYS = ["events", "metric", "exceptions", "messages", "messageExcludeExps", "appsExcluded", "metricIntervalS", "addLogs", "aliveTimeoutS", "batchPeriodM", "batchMaxMessages"];
+const CONFIG_KEYS = ["events", "metric", "exceptions", "messages", "messageExcludeExps", "appsExcluded", "metricIntervalS", "addLogs", "aliveTimeoutS", "batchPeriodM", "batchMaxMessages", "mailTo", "replyTo"];
 class Health {
     constructor(_config) {
         this._config = _config;
