@@ -28,20 +28,23 @@ class Notify {
         this._holdTill = till;
     }
     async sendBatch() {
+        const snapshot = this._messages.slice(); // make snapshot of messages
+        this._messages = [];
         let body = "", i = 1;
-        for (const message of this._messages)
+        for (const message of snapshot)
             body += `-------- ${i++} | ${message.subject} | ${message.on.toISOString()} --------<br/>${message.body}`;
         const temp = {
-            subject: `${this._messages[0].subject} (${this._messages.length} items)`,
+            subject: `${snapshot[0].subject} (${snapshot.length} items)`,
             body,
-            attachements: this._messages.filter(e => e.attachements != null).map(e => e.attachements).reduce((p, c) => p.concat(c), [])
+            attachements: snapshot.filter(e => e.attachements != null).map(e => e.attachements).reduce((p, c) => p.concat(c), [])
         };
         try {
             await this._mail.send(temp);
-            Log_1.debug(`batch of ${this._messages.length} messages sent`);
-            this._messages = [];
+            Log_1.debug(`batch of ${snapshot.length} messages sent`);
         }
         catch (ex) {
+            // restore messages if sent fail
+            this._messages.unshift(...snapshot);
             Log_1.error(`can't send batch mail -> ${ex.message || ex}`);
         }
     }
@@ -59,7 +62,7 @@ class Notify {
         else {
             Log_1.debug(`message -> ${message.subject}`);
             try {
-                this._mail.send(message);
+                await this._mail.send(message);
             }
             catch (ex) {
                 Log_1.error(`can't send mail -> ${ex.message || ex}`);
