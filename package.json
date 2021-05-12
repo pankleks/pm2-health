@@ -9,7 +9,7 @@
   "author": "Krzysztof Heim",
   "license": "MIT",
   "dependencies": {
-    "nodemailer": "6.3.0",
+    "nodemailer": "6.4.16",
     "planck-http-fetch": "1.6.1",
     "pm2": "3.5.1",
     "pmx": "1.6.7"
