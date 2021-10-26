@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Notify = void 0;
 const Mail_1 = require("./Mail");
 const Log_1 = require("./Log");
 // todo: add messages persistance in case of crash

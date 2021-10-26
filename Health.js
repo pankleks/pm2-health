@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.stopIfEx = exports.Health = void 0;
 const PM2 = require("pm2");
 const Pmx = require("pmx");
 const Fs = require("fs");

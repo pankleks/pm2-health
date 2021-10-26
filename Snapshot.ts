@@ -102,6 +102,9 @@ export class Snapshot {
         }
     }
 
+    /**
+     * detects if application is inactive based on last received probe time
+     */
     inactivate() {
         const t = new Date().getTime();
 
@@ -110,9 +113,11 @@ export class Snapshot {
                 app = this._data.app[<any>id],
                 dt = (t - app.timeStamp) / 60000;
 
-            app.inactive = dt > this._config.snapshot.inactiveAfterM;
-            if (app.inactive)
-                info(`app [${app.name}] is inactive`);
+            const inactive = dt > this._config.snapshot.inactiveAfterM;
+            if (app.inactive !== inactive)
+                info(`app [${app.name}] inactive = ${inactive}`);
+
+            app.inactive = inactive;
         }
     }
 }

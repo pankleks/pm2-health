@@ -9,14 +9,14 @@
   "author": "Krzysztof Heim",
   "license": "MIT",
   "dependencies": {
-    "nodemailer": "6.3.0",
-    "planck-http-fetch": "1.6.1",
+    "nodemailer": "6.7.0",
+    "planck-http-fetch": "1.7.4",
     "pm2": "3.5.1",
     "pmx": "1.6.7"
   },
   "devDependencies": {
-    "@types/node": "8.10.54",
-    "@types/nodemailer": "6.2.1"
+    "@types/node": "12.12.6",
+    "@types/nodemailer": "6.4.4"
   },
   "keywords": [
     "pm2",

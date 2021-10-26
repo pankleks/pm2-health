@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Snapshot = void 0;
 const Fs = require("fs");
 const os_1 = require("os");
 const planck_http_fetch_1 = require("planck-http-fetch");
@@ -50,13 +51,17 @@ class Snapshot {
             Log_1.error(`snapshot push failed -> ${ex.message || ex}`);
         }
     }
+    /**
+     * detects if application is inactive based on last received probe time
+     */
     inactivate() {
         const t = new Date().getTime();
         for (const id of Object.keys(this._data.app)) {
             const app = this._data.app[id], dt = (t - app.timeStamp) / 60000;
-            app.inactive = dt > this._config.snapshot.inactiveAfterM;
-            if (app.inactive)
-                Log_1.info(`app [${app.name}] is inactive`);
+            const inactive = dt > this._config.snapshot.inactiveAfterM;
+            if (app.inactive !== inactive)
+                Log_1.info(`app [${app.name}] inactive = ${inactive}`);
+            app.inactive = inactive;
         }
     }
 }
