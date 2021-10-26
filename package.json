@@ -1,6 +1,6 @@
 {
   "name": "pm2-health",
-  "version": "1.11.9",
+  "version": "1.11.10",
   "description": "Apps health monitor and mail notification module for pm2",
   "main": "App.js",
   "scripts": {
@@ -11,7 +11,7 @@
   "dependencies": {
     "nodemailer": "6.7.0",
     "planck-http-fetch": "1.7.4",
-    "pm2": "3.5.1",
+    "pm2": "5.1.2",
     "pmx": "1.6.7"
   },
   "devDependencies": {
