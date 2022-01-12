@@ -26,7 +26,8 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
         "user": "your-smtp-user",   // auth
         "password": "your-smtp-password",   // auth
         "secure": false,
-        "disabled": false
+        "disabled": false,
+        "clientHostName": "your-machine.com", // optional, will force the client host-name FQDN used in SMTP HELLO. If not set, NodeMailer will ask host name to the OS, and use 127.0.0.1 if it's not a FQDN.
     },
     "mailTo": "mail1,mail2"
 }
