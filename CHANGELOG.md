@@ -1,3 +1,6 @@
+# 1.12.0
+- added optional `clientHostName` into SMTP config
+
 # 1.11.0
 - added batching of messages
 

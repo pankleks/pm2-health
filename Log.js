@@ -15,7 +15,7 @@ function enableDebugLog() {
     exports.debug = (text) => {
         console.log(`d-${new Date().toISOString()}: ${text}`);
     };
-    exports.debug("debug log enabled in config");
+    (0, exports.debug)("debug log enabled in config");
 }
 exports.enableDebugLog = enableDebugLog;
 //# sourceMappingURL=Log.js.map

@@ -14,12 +14,12 @@ Pmx.initModule({
         mem: true
     }
 }, async (ex, config) => {
-    Health_1.stopIfEx(ex);
+    (0, Health_1.stopIfEx)(ex);
     try {
         await (new Health_1.Health(config)).go();
     }
     catch (ex) {
-        Health_1.stopIfEx(ex);
+        (0, Health_1.stopIfEx)(ex);
     }
 });
 //# sourceMappingURL=App.js.map

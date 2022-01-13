@@ -70,7 +70,7 @@ export class Mail {
             tls: { rejectUnauthorized: false },
             secure: this._config.smtp.secure === true,
             auth: null,
-            name: (this._config.smtp.clientHostName && this._config.smtp.clientHostName !== "") ? this._config.smtp.clientHostName : null
+            name: typeof this._config.smtp.clientHostName == "string" && this._config.smtp.clientHostName ? this._config.smtp.clientHostName : null
         };
 
         if (this._config.smtp.user)

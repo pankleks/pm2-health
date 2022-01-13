@@ -10,7 +10,7 @@ class Snapshot {
     constructor(_config) {
         this._config = _config;
         this._data = {
-            host: os_1.hostname(),
+            host: (0, os_1.hostname)(),
             app: {}
         };
         if (!this._config.snapshot)
@@ -34,7 +34,7 @@ class Snapshot {
         this._data.timeStamp = new Date().getTime();
         Fs.writeFile(`History_${new Date().toISOString()}.json`, JSON.stringify(this._data), (ex) => {
             if (ex)
-                Log_1.error(`can't dump history -> ${ex.message || ex}`);
+                (0, Log_1.error)(`can't dump history -> ${ex.message || ex}`);
         });
     }
     async send() {
@@ -48,7 +48,7 @@ class Snapshot {
             await fetch.fetch(JSON.stringify(this._data));
         }
         catch (ex) {
-            Log_1.error(`snapshot push failed -> ${ex.message || ex}`);
+            (0, Log_1.error)(`snapshot push failed -> ${ex.message || ex}`);
         }
     }
     /**
@@ -60,7 +60,7 @@ class Snapshot {
             const app = this._data.app[id], dt = (t - app.timeStamp) / 60000;
             const inactive = dt > this._config.snapshot.inactiveAfterM;
             if (app.inactive !== inactive)
-                Log_1.info(`app [${app.name}] inactive = ${inactive}`);
+                (0, Log_1.info)(`app [${app.name}] inactive = ${inactive}`);
             app.inactive = inactive;
         }
     }

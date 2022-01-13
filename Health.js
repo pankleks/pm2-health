@@ -26,10 +26,10 @@ class Health {
         this._config = _config;
         this._timeouts = new Map();
         if (this._config.debugLogEnabled === true)
-            Log_1.enableDebugLog();
-        Log_1.debug(JSON.stringify(this._config, undefined, 2));
+            (0, Log_1.enableDebugLog)();
+        (0, Log_1.debug)(JSON.stringify(this._config, undefined, 2));
         if (this._config.metricIntervalS == null || this._config.metricIntervalS < MERTIC_INTERVAL_S) {
-            Log_1.info(`setting default metric check interval ${MERTIC_INTERVAL_S} s.`);
+            (0, Log_1.info)(`setting default metric check interval ${MERTIC_INTERVAL_S} s.`);
             this._config.metricIntervalS = MERTIC_INTERVAL_S;
         }
         if (!this._config.metric)
@@ -40,7 +40,7 @@ class Health {
     async fetchConfig() {
         // todo: what if web config contains invalid data, changes should be reversed
         try {
-            Log_1.info(`fetching config from [${this._config.webConfig.url}]`);
+            (0, Log_1.info)(`fetching config from [${this._config.webConfig.url}]`);
             const fetch = new planck_http_fetch_1.Fetch(this._config.webConfig.url);
             if (this._config.webConfig.auth && this._config.webConfig.auth.user) // auth
                 fetch.basicAuth(this._config.webConfig.auth.user, this._config.webConfig.auth.password);
@@ -49,12 +49,12 @@ class Health {
             for (const key of CONFIG_KEYS)
                 if (config[key] != null) {
                     this._config[key] = config[key];
-                    Log_1.info(`applying [${key}] = ${config[key]}`);
+                    (0, Log_1.info)(`applying [${key}] = ${config[key]}`);
                 }
             this.configChanged();
         }
         catch (ex) {
-            Log_1.error(`failed to fetch config -> ${ex.message || ex}`);
+            (0, Log_1.error)(`failed to fetch config -> ${ex.message || ex}`);
         }
     }
     configChanged() {
@@ -73,7 +73,7 @@ class Health {
         return false;
     }
     async go() {
-        Log_1.info(`pm2-health is on`);
+        (0, Log_1.info)(`pm2-health is on`);
         this.configChanged();
         // fetch web config (if set)
         if (this._config.webConfig && this._config.webConfig.url) {
@@ -99,7 +99,7 @@ class Health {
                         <p>Event: <b>${data.event}</b></p>
                         <pre>${JSON.stringify(data, undefined, 4)}</pre>`,
                         priority: "high",
-                        attachements: LOGS.filter(e => this._config.addLogs === true && data.process[e]).map(e => ({ filename: path_1.basename(data.process[e]), path: data.process[e] }))
+                        attachements: LOGS.filter(e => this._config.addLogs === true && data.process[e]).map(e => ({ filename: (0, path_1.basename)(data.process[e]), path: data.process[e] }))
                     });
                 });
                 if (this._config.exceptions)
@@ -146,18 +146,18 @@ class Health {
             holdTill.setTime(holdTill.getTime() + t * 60000);
             this._notify.hold(holdTill);
             const msg = `mail held for ${t} minutes, till ${holdTill.toISOString()}`;
-            Log_1.info(msg);
+            (0, Log_1.info)(msg);
             reply(msg);
         });
         Pmx.action("unheld", undefined, (reply) => {
             this._notify.hold(null);
-            Log_1.info("mail unheld");
+            (0, Log_1.info)("mail unheld");
             reply("mail unheld");
         });
         Pmx.action("mail", undefined, async (reply) => {
             try {
                 await this._notify.send({ subject: "Test only", body: "This is test only.", priority: "high" }); // high -> to bypass batching
-                Log_1.info("mail send");
+                (0, Log_1.info)("mail send");
                 reply("mail send");
             }
             catch (ex) {
@@ -181,7 +181,7 @@ class Health {
     aliveReset(process, timeoutS, count = 1) {
         clearTimeout(this._timeouts.get(process.name));
         this._timeouts.set(process.name, setTimeout(() => {
-            Log_1.info(`death ${process.name}:${process.pm_id}, count ${count}`);
+            (0, Log_1.info)(`death ${process.name}:${process.pm_id}, count ${count}`);
             this._notify.send({
                 subject: `${process.name}:${process.pm_id} - is death!`,
                 body: `
@@ -194,7 +194,7 @@ class Health {
         }, timeoutS * 1000));
     }
     testProbes() {
-        Log_1.debug("testing probes");
+        (0, Log_1.debug)("testing probes");
         const alerts = [];
         PM2.list(async (ex, list) => {
             stopIfEx(ex);
@@ -225,7 +225,7 @@ class Health {
                     if (!probe.direct) {
                         v = Number.parseFloat(v);
                         if (Number.isNaN(v)) {
-                            Log_1.error(`monit [${app.name}.${key}] -> [${monit[key].value}] is not a number`);
+                            (0, Log_1.error)(`monit [${app.name}.${key}] -> [${monit[key].value}] is not a number`);
                             continue;
                         }
                     }
@@ -261,7 +261,7 @@ class Health {
 exports.Health = Health;
 function stopIfEx(ex) {
     if (ex) {
-        Log_1.error(ex.message || ex);
+        (0, Log_1.error)(ex.message || ex);
         PM2.disconnect();
         process.exit(1);
     }

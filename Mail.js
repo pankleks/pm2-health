@@ -23,7 +23,7 @@ class Mail {
             this._template = Fs.readFileSync("Template.html", "utf8");
         }
         catch (_a) {
-            Log_1.info(`Template.html not found`);
+            (0, Log_1.info)(`Template.html not found`);
         }
     }
     configChanged() {
@@ -32,7 +32,7 @@ class Mail {
     }
     async send(message) {
         if (this._config.smtp.disabled === true) {
-            Log_1.debug("mail sending is disbled in config");
+            (0, Log_1.debug)("mail sending is disbled in config");
             return;
         }
         const temp = {
@@ -40,7 +40,8 @@ class Mail {
             port: this._config.smtp.port,
             tls: { rejectUnauthorized: false },
             secure: this._config.smtp.secure === true,
-            auth: null
+            auth: null,
+            name: typeof this._config.smtp.clientHostName == "string" && this._config.smtp.clientHostName ? this._config.smtp.clientHostName : null
         };
         if (this._config.smtp.user)
             temp.auth = {
@@ -54,7 +55,7 @@ class Mail {
             to: this._config.mailTo,
             from: this._config.smtp.from || this._config.smtp.user,
             replyTo: this._config.replyTo,
-            subject: `pm2-health: ${os_1.hostname()}, ${message.subject}`,
+            subject: `pm2-health: ${(0, os_1.hostname)()}, ${message.subject}`,
             html: this._template
                 .replace(/<!--\s*body\s*-->/, message.body)
                 .replace(/<!--\s*timeStamp\s*-->/, new Date().toISOString()),
