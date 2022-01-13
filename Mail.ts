@@ -12,6 +12,7 @@ export interface ISmtpConfig {
         secure?: boolean;
         from?: string;
         disabled: boolean;
+        clientHostName?: string;
     },
     mailTo: string;
     replyTo: string;
@@ -68,7 +69,8 @@ export class Mail {
             port: this._config.smtp.port,
             tls: { rejectUnauthorized: false },
             secure: this._config.smtp.secure === true,
-            auth: null
+            auth: null,
+            name: (this._config.smtp.clientHostName && this._config.smtp.clientHostName !== "") ? this._config.smtp.clientHostName : null
         };
 
         if (this._config.smtp.user)
