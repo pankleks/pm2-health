@@ -1,6 +1,6 @@
 {
   "name": "pm2-health",
-  "version": "1.12.10",
+  "version": "1.12.11",
   "description": "Apps health monitor and mail notification module for pm2",
   "main": "App.js",
   "scripts": {
@@ -34,11 +34,16 @@
     "url": "git+https://github.com/pankleks/pm2-health"
   },
   "config": {
-    "smtp": {
+    "credentials": {
+      "type": "smtp|oauth2",
       "host": "your-smtp-host",
       "port": 587,
       "user": "your-smtp-user",
       "password": "your-smtp-password",
+      "clientId": "client-id",
+      "clientSecret": "client-secret",
+      "accessToken": "access-token",
+      "refreshToken": "refresh-token",
       "disabled": false
     },
     "mailTo": "mail1,mail2",
