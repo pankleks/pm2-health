@@ -34,8 +34,8 @@
     "url": "git+https://github.com/pankleks/pm2-health"
   },
   "config": {
-    "credentials": {
-      "type": "smtp|oauth2",
+    "smtp": {
+      "type": "plain|oauth2",
       "host": "your-smtp-host",
       "port": 587,
       "user": "your-smtp-user",

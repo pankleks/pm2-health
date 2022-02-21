@@ -4,7 +4,7 @@ import { hostname } from "os";
 import { info, debug, error } from "./Log";
 
 export interface ISmtpConfig {
-    credentials: {
+    smtp: {
         type?: string,
         host?: string;
         port?: number;
@@ -35,29 +35,29 @@ export interface IMessage {
 
 export class Mail {
     private _template = "<p><!-- body --></p><p><!-- timeStamp --></p>";
-    private _authTypes = ['smtp', 'oauth2'];
+    private _authTypes = ['plain', 'oauth2'];
 
     constructor(private _config: ISmtpConfig) {
-        const _credentials = this._config.credentials;
-        if (!_credentials)
-            this._config.credentials = { disabled: true };
+        const _smtp = this._config.smtp;
+        if (!_smtp)
+            this._config.smtp = { disabled: true };
 
-        if (_credentials.disabled === true)
+        if (_smtp.disabled === true)
             return; // don't analyze config if disabled
 
-        if (!_credentials.type || _credentials.type === 'smtp|oauth2') {
-            _credentials.type = "smtp";
+        if (!_smtp.type || _smtp.type === 'plain|oauth2') {
+            _smtp.type = "plain";
         }
 
-        if (!this._authTypes.includes(_credentials.type.trim().toLowerCase())) 
-            throw new Error(`[credentials.type] Authentication type not found ${_credentials.type.trim().toLowerCase()}`);
+        if (!this._authTypes.includes(_smtp.type.trim().toLowerCase())) 
+            throw new Error(`[smtp.type] Authentication type not found ${_smtp.type.trim().toLowerCase()}`);
 
-        _credentials.type = _credentials.type.trim().toLowerCase();
+        _smtp.type = _smtp.type.trim().toLowerCase();
 
-        if (!_credentials.host)
-            throw new Error(`[credentials.host] not set`);
-        if (!_credentials.port)
-            throw new Error(`[credentials.port] not set`);
+        if (!_smtp.host)
+            throw new Error(`[smtp.host] not set`);
+        if (!_smtp.port)
+            throw new Error(`[smtp.port] not set`);
 
         try {
             this._template = Fs.readFileSync("Template.html", "utf8");
@@ -73,34 +73,34 @@ export class Mail {
     }
 
     async send(message: IMessage) {
-        if (this._config.credentials.disabled === true) {
+        if (this._config.smtp.disabled === true) {
             debug("mail sending is disbled in config");
             return;
         }
 
         const temp = {
-            host: this._config.credentials.host,
-            port: this._config.credentials.port,
+            host: this._config.smtp.host,
+            port: this._config.smtp.port,
             tls: { rejectUnauthorized: false },
-            secure: this._config.credentials.secure === true,
+            secure: this._config.smtp.secure === true,
             auth: null,
-            name: typeof this._config.credentials.clientHostName == "string" && this._config.credentials.clientHostName ? this._config.credentials.clientHostName : null
+            name: typeof this._config.smtp.clientHostName == "string" && this._config.smtp.clientHostName ? this._config.smtp.clientHostName : null
         };
 
-        if (this._config.credentials.type === 'smtp' && this._config.credentials.user)
+        if (this._config.smtp.type === 'plain' && this._config.smtp.user)
             temp.auth = {
-                user: this._config.credentials.user,
-                pass: this._config.credentials.password
+                user: this._config.smtp.user,
+                pass: this._config.smtp.password
             };
 
-        if (this._config.credentials.type === 'oauth2')
+        if (this._config.smtp.type === 'oauth2')
             temp.auth = {
                 type: 'OAuth2',
-                user: this._config.credentials.user,
-                clientId: this._config.credentials.clientId,
-                clientSecret: this._config.credentials.clientSecret,
-                accessToken: this._config.credentials.accessToken,
-                refreshToken: this._config.credentials.refreshToken
+                user: this._config.smtp.user,
+                clientId: this._config.smtp.clientId,
+                clientSecret: this._config.smtp.clientSecret,
+                accessToken: this._config.smtp.accessToken,
+                refreshToken: this._config.smtp.refreshToken
             }
 
         const
@@ -112,7 +112,7 @@ export class Mail {
 
         await transport.sendMail({
             to: this._config.mailTo,
-            from: this._config.credentials.from || this._config.credentials.user, // use from, if not set -> user
+            from: this._config.smtp.from || this._config.smtp.user, // use from, if not set -> user
             replyTo: this._config.replyTo,
             subject: `pm2-health: ${hostname()}, ${message.subject}`,
             html: this._template

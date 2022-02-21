@@ -19,8 +19,8 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 ```json
 "pm2-health": {
-    "credentials": {
-        "type": "smtp|oauth2", // optional, if not set smtp is the default
+    "smtp": {
+        "type": "plain|oauth2", // optional, if not set plain is the default
         "host": "your-smtp-host",
         "port": 587,
         "from": "your-from-mail", // if not set, user will be used
@@ -41,9 +41,9 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 
 ### All config options:
 
-* `credentials` - Mail Server server configuration. If your SMTP doesn't require auth, leave `smtp.user` empty
+* `smtp` - SMTP server configuration. If your SMTP doesn't require auth, leave `smtp.user` empty
 
-* `type` - Use SMTP or OAuth2 as per your need
+* `type` - Use Plain or OAuth2 as per your need
 
 * `mailTo` - comma separated list of notification receipients
 
