@@ -20,11 +20,16 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 ```json
 "pm2-health": {
     "smtp": {
+        "type": "plain|oauth2", // optional, if not set plain is the default
         "host": "your-smtp-host",
         "port": 587,
         "from": "your-from-mail", // if not set, user will be used
         "user": "your-smtp-user",   // auth
         "password": "your-smtp-password",   // auth
+        "clientId": "client-id", //OAuth2 clientId
+        "clientSecret": "client-secret", //OAuth2 clientSecret
+        "accessToken": "access-token", //OAuth2 accessToken
+        "refreshToken": "refresh-token", //OAuth2 refreshToken
         "secure": false,
         "disabled": false,
         "clientHostName": "your-machine.com", // optional, will force the client host-name FQDN used in SMTP HELLO. If not set, NodeMailer will ask host name to the OS, and use 127.0.0.1 if it's not a FQDN.
@@ -37,6 +42,8 @@ After installation run `pm2 conf` to configure module. Alternatively edit `modul
 ### All config options:
 
 * `smtp` - SMTP server configuration. If your SMTP doesn't require auth, leave `smtp.user` empty
+
+* `type` - Use Plain or OAuth2 as per your need
 
 * `mailTo` - comma separated list of notification receipients
 

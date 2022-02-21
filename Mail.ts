@@ -5,10 +5,15 @@ import { info, debug, error } from "./Log";
 
 export interface ISmtpConfig {
     smtp: {
+        type?: string,
         host?: string;
         port?: number;
         user?: string;
         password?: string;
+        clientId?: string,
+        clientSecret?: string,
+        accessToken?: string,
+        refreshToken?: string,
         secure?: boolean;
         from?: string;
         disabled: boolean;
@@ -30,19 +35,28 @@ export interface IMessage {
 
 export class Mail {
     private _template = "<p><!-- body --></p><p><!-- timeStamp --></p>";
+    private _authTypes = ['plain', 'oauth2'];
 
     constructor(private _config: ISmtpConfig) {
-        if (!this._config.smtp)
+        const _smtp = this._config.smtp;
+        if (!_smtp)
             this._config.smtp = { disabled: true };
 
-        if (this._config.smtp.disabled === true)
+        if (_smtp.disabled === true)
             return; // don't analyze config if disabled
 
-        if (!this._config.smtp)
-            throw new Error(`[smtp] not set`);
-        if (!this._config.smtp.host)
+        if (!_smtp.type || _smtp.type === 'plain|oauth2') {
+            _smtp.type = "plain";
+        }
+
+        if (!this._authTypes.includes(_smtp.type.trim().toLowerCase())) 
+            throw new Error(`[smtp.type] Authentication type not found ${_smtp.type.trim().toLowerCase()}`);
+
+        _smtp.type = _smtp.type.trim().toLowerCase();
+
+        if (!_smtp.host)
             throw new Error(`[smtp.host] not set`);
-        if (!this._config.smtp)
+        if (!_smtp.port)
             throw new Error(`[smtp.port] not set`);
 
         try {
@@ -73,11 +87,21 @@ export class Mail {
             name: typeof this._config.smtp.clientHostName == "string" && this._config.smtp.clientHostName ? this._config.smtp.clientHostName : null
         };
 
-        if (this._config.smtp.user)
+        if (this._config.smtp.type === 'plain' && this._config.smtp.user)
             temp.auth = {
                 user: this._config.smtp.user,
                 pass: this._config.smtp.password
             };
+
+        if (this._config.smtp.type === 'oauth2')
+            temp.auth = {
+                type: 'OAuth2',
+                user: this._config.smtp.user,
+                clientId: this._config.smtp.clientId,
+                clientSecret: this._config.smtp.clientSecret,
+                accessToken: this._config.smtp.accessToken,
+                refreshToken: this._config.smtp.refreshToken
+            }
 
         const
             transport = Mailer.createTransport(temp),
